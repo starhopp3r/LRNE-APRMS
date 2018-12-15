@@ -2,14 +2,19 @@
 <html>
 	<head>
 		<title>🧭 Compass | SudoX</title>
+		<!-- Meta -->
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 		<!-- jQuery -->
 		<script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
 		<!-- SocketIO -->
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+		<!-- Google Maps JavaScript API -->
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=true_or_false&key=AIzaSyBKw8yu7hpiwYnN66qNcSqcnh8KvjH6Hw8"></script>
 		<!-- Google Fonts-->
 		<link href="https://fonts.googleapis.com/css?family=Josefin+Sans" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-		<!-- Main Javascript -->
+		<!-- Javascript Files -->
 		<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/socket.js') }}"></script>
 		<!-- Main CSS -->
@@ -20,11 +25,17 @@
 		<div id="splashscreen">
 			<p class="enter">🧭 Compass</p>
 		</div>
+		<!-- Broadcast Dialog Box -->
+		<div id="broadcast-dialog" class="broadcast-dialog">
+			<h3 class="dialog-heading">Broadcast Message</h3>
+			<input type="text" name="broadcast-textbox" class="dialog-text">
+		</div>
 		<!-- Main Content -->
 		<div class="main-container">
-			<div class="section-header">
+			<div id="top-header" class="section-header">
 				<h3 class="section-title">Mission Overview</h3>
 			</div>
+			<!-- Mission Information Tab -->
 			<div id="info-tab" class="float-div">
 				<h3 class="float-div-title">Vitals</h3>
 				<hr class="hr-rule">
@@ -32,8 +43,13 @@
 				<p class="float-info">Requests for Ration: <b id="ration">0</b></p>
 				<p class="float-info">Requests for Shelter: <b id="shelter">0</b></p>
 				<p class="float-info">Requests for Medical Aid: <b id="aid">0</b></p>
+				<button id="broadcast-btn" class="broadcast_button">BROADCAST</button>
 			</div>
-			<iframe id="iframe-content" class="main-iframe"></iframe>
+			<!-- Main Map -->
+			<div id="map_canvas" class="gmap">
+				📡 &nbsp;No Signal
+			</div>
+			<!-- Before and After Analysis Section -->
 			<div class="section-header">
 				<h3 class="section-title">Before & After Analysis</h3>
 			</div>
@@ -43,11 +59,6 @@
 			</div>
 			<script src="https://cdn.knightlab.com/libs/juxtapose/latest/js/juxtapose.min.js"></script>
 			<link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">
-			<!-- Cache issues -->
-			<script>
-    			var frameElement = document.getElementById("iframe-content");
-    			frameElement.contentWindow.location.href = frameElement.src;
-			</script>
 		</div>	
 	</body>
 </html>

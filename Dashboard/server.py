@@ -1,33 +1,10 @@
 # Flask sever that listens to POSTs and emits to index page
 # To serve [DEBUG]: FLASK_ENV=development FLASK_APP=server.py DEBUG=True flask run --host=0.0.0.0
-from gmplot import gmplot
 from flask_socketio import SocketIO
 from flask import Flask, request, render_template
 
 app = Flask(__name__)
 socketio = SocketIO(app)
-
-# Google Maps JavaScript API key
-APIKEY = 'AIzaSyBKw8yu7hpiwYnN66qNcSqcnh8KvjH6Hw8'
-
-# Place a marker on Google Maps and save page
-def googleMapsRender(gps_ts, lat, lon, res_id, mcolor=None, mtext=None):
-	gmap = gmplot.GoogleMapPlotter(float(lat), float(lon), 15, apikey=APIKEY)
-	if res_id == '0':
-		# Request for ration
-		mcolor = 'yellow'
-		mtext = "Trans. Time: {}\\nCoordinates: {}, {}\\nResource: Ration".format(gps_ts, lat, lon)
-	elif res_id == '1':
-		# Request for shelter
-		mcolor = 'green'
-		mtext = "Trans. Time: {}\\nCoordinates: {}, {}\\nResource: Shelter".format(gps_ts, lat, lon)
-	elif res_id == '2':
-		# Request for medical aid
-		mcolor = 'red'
-		mtext = "Trans. Time: {}\\nCoordinates: {}, {}\\nResource: Medical Aid".format(gps_ts, lat, lon)
-	gmap.coloricon = "http://www.googlemapsmarkers.com/v1/%s/"
-	gmap.marker(float(lat), float(lon), color=mcolor, title=mtext)
-	gmap.draw("static/map.html")
 
 # Root handler renders index page
 @app.route('/', methods=['GET'])
@@ -45,8 +22,7 @@ def inletHandler():
 	lat = content[2]
 	lon = content[3]
 	res_id = content[4]
-	socketio.emit('data_stream',  {'data': res_id})
-	googleMapsRender(gps_timestamp, lat, lon, res_id)
+	socketio.emit('data_stream',  {'gps_ts': gps_timestamp, 'res': res_id, 'lat': float(lat), 'lon': float(lon)})
 	return "OK"
 
 # Prevent cached responses

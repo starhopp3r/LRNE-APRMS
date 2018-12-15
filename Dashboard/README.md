@@ -6,16 +6,11 @@ When someone mentions mission control, massive projectors and data screens sprin
 
 ## Caveats
 
-Some browsers cache the dashboard's contents to minimize load time. This behavior affects the iframe refresh function that's fired every time the client side javascript receives an emit message from the web server. To mitigate the effects of caching; the server uses cache response directives. Users are requested to clear cache and session data using their browser's menu to solve this problem to good effect.
+Not known.
 
 ## Planned Features
 
 Just a scratchpad here to help in guiding newborn features.
-
-### Technical
-
-1. A complete JavaScript-based implementation of the *Vitals* map.
-2. Removal of iframes.
 
 ### Feature Set
 

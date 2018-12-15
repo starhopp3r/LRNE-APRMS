@@ -9,9 +9,24 @@ $(document).ready(function(e) {
 	setTimeout(function() {
 		// Fade out splashscreen
 		$('#splashscreen').fadeOut(500);
-		// Add map source attribute to iframe
-		$('#iframe-content').attr('src', window.location.href + 'static/map.html');
-		// Fade in information tab
-		$('#info-tab').fadeIn(500);
+		// Fade in top header
+		$('#top-header').fadeIn(500);
     }, 3000);
+
+    // Listen for broadcast button clicks
+    // and show the broadcast dialog box
+    $('#broadcast-btn').click(function(e) {
+    	$('#broadcast-dialog').show();
+    	e.stopPropagation();
+    });
+
+    $("#broadcast-dialog").click(function(e){
+    	e.stopPropagation();
+	});
+
+	// Close the dialog box when mouse click
+	// is elsewhere in the document
+	$(document).click(function(){
+	    $("#broadcast-dialog").fadeOut(500);
+	});
 });
