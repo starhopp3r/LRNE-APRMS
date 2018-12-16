@@ -16,7 +16,7 @@ $(document).ready(function(e) {
     // Listen for broadcast button clicks
     // and show the broadcast dialog box
     $('#broadcast-btn').click(function(e) {
-    	$('#broadcast-dialog').show();
+    	$('#broadcast-dialog').fadeIn(200);
     	e.stopPropagation();
     });
 
@@ -27,6 +27,6 @@ $(document).ready(function(e) {
 	// Close the dialog box when mouse click
 	// is elsewhere in the document
 	$(document).click(function(){
-	    $("#broadcast-dialog").fadeOut(500);
+	    $("#broadcast-dialog").fadeOut(200);
 	});
 });

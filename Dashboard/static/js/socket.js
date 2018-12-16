@@ -5,9 +5,11 @@ function google_map(gps_ts, lat, lon, res_id) {
 	// Center point of the map to be rendered
 	var centerlatlng = new google.maps.LatLng(lat, lon);
 	var myOptions = {
-		zoom: 15,
+		zoom: 19,
+		gestureHandling: 'cooperative',
 		center: centerlatlng,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
+		mapTypeId: google.maps.MapTypeId.HYBRID,
+		labels: true
 	};
 	// Create a new map with custom options
 	var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
