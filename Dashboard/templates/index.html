@@ -64,9 +64,9 @@
 			<!-- Multiple map options with slider -->
 			<div id="sat-img" class="juxtapose" data-startingposition="50%">
 				<img src="{{ url_for('static', filename='img/2013.jpg') }}" data-label="Before Flood"/>
-				<img src="{{ url_for('static', filename='img/diff.jpg') }}" data-label="After Flood"/>
+				<img src="{{ url_for('static', filename='img/2014.jpg') }}" data-label="After Flood"/>
 			</div>
-			<script src="../static/js/juxtapose.js"></script>
+			<script src="{{ url_for('static', filename='js/juxtapose.js') }}"></script>
 			<link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">
 		</div>	
 	</body>

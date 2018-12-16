@@ -54,9 +54,13 @@ $(document).ready(function(e) {
 	// Dropdown listner
 	$('#satImg').click(function() {
 		// Show satellite imagery
+		slider.rightImage.children[0].src = serveLoc + "/static/img/2014.jpg"
+		juxtapose.scanPage()
 	});
 
-	$('#cvAnalysis').click(function(){
+	$('#cvAnalysis').click(function() {
 		// Show computer vision analysis
+		slider.rightImage.children[0].src = serveLoc + "/static/img/diff.jpg"
+		juxtapose.scanPage()
 	});
 });
