@@ -8,15 +8,6 @@ When someone mentions mission control, massive projectors and data screens sprin
 
 Not known.
 
-## Planned Features
-
-Just a scratchpad here to help in guiding newborn features.
-
-### Feature Set
-
-1. Compute difference in before and after images using OpenCV.
-2. Detecting flood areas on satellite images using OpenCV.
-
 ## Tested Environments
 
 Tested locally on my development machine, MacBook Pro running macOS Mojave (v10.14.1) on the following browsers.
