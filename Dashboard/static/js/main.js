@@ -1,6 +1,27 @@
+var serveLoc = 'http://' + document.domain + ':' + location.port;
+
 // Scroll to top on page refresh
 window.onbeforeunload = function () {
   window.scrollTo(0, 0);
+}
+
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function mapOptions() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    for (var i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
 }
 
 $(document).ready(function(e) {
@@ -28,5 +49,14 @@ $(document).ready(function(e) {
 	// is elsewhere in the document
 	$(document).click(function(){
 	    $("#broadcast-dialog").fadeOut(200);
+	});
+
+	// Dropdown listner
+	$('#satImg').click(function() {
+		// Show satellite imagery
+	});
+
+	$('#cvAnalysis').click(function(){
+		// Show computer vision analysis
 	});
 });

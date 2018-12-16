@@ -14,7 +14,7 @@
 		<!-- Google Fonts-->
 		<link href="https://fonts.googleapis.com/css?family=Josefin+Sans" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-		<!-- Javascript Files -->
+		<!-- Javascript files -->
 		<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/socket.js') }}"></script>
 		<!-- Main CSS -->
@@ -25,17 +25,17 @@
 		<div id="splashscreen">
 			<p class="enter">🧭 Compass</p>
 		</div>
-		<!-- Broadcast Dialog Box -->
+		<!-- Broadcast dialog box -->
 		<div id="broadcast-dialog" class="broadcast-dialog">
 			<h3 class="dialog-heading">Broadcast Message</h3>
 			<input type="text" name="broadcast-textbox" class="dialog-text">
 		</div>
-		<!-- Main Content -->
+		<!-- Main content -->
 		<div class="main-container">
 			<div id="top-header" class="section-header">
 				<h3 class="section-title">Mission Overview</h3>
 			</div>
-			<!-- Mission Information Tab -->
+			<!-- Mission information tab -->
 			<div id="info-tab" class="float-div">
 				<h3 class="float-div-title">Vitals</h3>
 				<hr class="hr-rule">
@@ -45,15 +45,24 @@
 				<p class="float-info">Requests for Medical Aid: <b id="aid">0</b></p>
 				<button id="broadcast-btn" class="broadcast_button">BROADCAST</button>
 			</div>
-			<!-- Main Map -->
+			<!-- Main map -->
 			<div id="map_canvas" class="gmap">
 				📡 &nbsp;No Signal
 			</div>
-			<!-- Before and After Analysis Section -->
+			<!-- Pre & post event data section -->
 			<div class="section-header">
 				<h3 class="section-title">Pre & Post Event Data</h3>
 			</div>
-			<div class="juxtapose" data-startingposition="50%">
+			<!-- Dropdown list to select different maps -->
+			<div class="dropdown">
+			  <button onclick="mapOptions()" class="dropbtn">Map Options</button>
+			  <div id="myDropdown" class="dropdown-content">
+			    <p id="satImg">Satellite Imagery</p>
+			    <p id="cvAnalysis">Computer Vision Analysis</p>
+			  </div>
+			</div>
+			<!-- Multiple map options with slider -->
+			<div id="sat-img" class="juxtapose" data-startingposition="50%">
 				<img src="{{ url_for('static', filename='img/2013.jpg') }}" data-label="Before Flood"/>
 				<img src="{{ url_for('static', filename='img/diff.jpg') }}" data-label="After Flood"/>
 			</div>
