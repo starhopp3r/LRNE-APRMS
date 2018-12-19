@@ -21,10 +21,11 @@ s.setblocking(False)
 # Every 30 seconds, attempts to obtain data from the UART
 while True:
     if uart.any():
-        data, _ = (uart.readline(), uart.readall()) # reads the first line available, then discards the rest
+        data = uart.readline()
+        uart.readall() # purge remaining data
+        print(data)
         if data.count(b',') != 4: # check to ensure that we have 4 parameters
             continue
 
-        print(data)
+        print(data[:-1])
         s.send(data[:-1]) # otherwise, sends the data, omitting the \n character
-
