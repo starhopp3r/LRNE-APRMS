@@ -438,7 +438,7 @@ bool gpsDetect(void);
 
 MCUFRIEND_kbv tft;
 String Message;
-SoftwareSerial gpsSerial (A5, A4); //A5 to GPS TX, A4 tp GPS RX
+SoftwareSerial gpsSerial (A7, A6); //A7 to GPS TX, A6 tp GPS RX
 TinyGPS gps;
 bool newdata = false;
 unsigned long startTime = millis();
