@@ -1,3 +1,8 @@
+// Var cache the previous broadcast message
+var old_broadcast_message = '';
+// Var cache the logistics response
+var old_logistics_message = 'P';
+
 function google_map(gps_ts, lat, lon, res_id) {
 	// Initialize marker and requested resource
 	var map_marker = "";
@@ -56,6 +61,15 @@ function google_map(gps_ts, lat, lon, res_id) {
 }
 
 function updateLogisticsOverview(gps_ts, lat, lon, res_id) {
+	// keep the card status constant
+	var cardStatus = "";
+	if (this.statusHeader != res_id || old_logistics_message == 'P') {
+		cardStatus = "PENDING";
+	} else if (old_logistics_message == 'I') {
+		cardStatus = "IN PROCESS";
+	} else if (old_logistics_message == 'C') {
+		cardStatus = "COMPLETE";
+	}
 	// Change the text in the card
 	if (res_id == '0')
 	{
@@ -63,7 +77,8 @@ function updateLogisticsOverview(gps_ts, lat, lon, res_id) {
 		$('#status-header').text("Ration");
 		$('#card-trans-time').text(gps_ts);
 		$('#card-coordinates').text(lat + ", " + lon);
-		$('#card-status').text("PENDING");
+		$('#card-status').text(cardStatus);
+		this.statusHeader = "0";
 	}
 	else if (res_id == '1')
 	{
@@ -71,7 +86,8 @@ function updateLogisticsOverview(gps_ts, lat, lon, res_id) {
 		$('#status-header').text("Shelter");
 		$('#card-trans-time').text(gps_ts);
 		$('#card-coordinates').text(lat + ", " + lon);
-		$('#card-status').text("PENDING");
+		$('#card-status').text(cardStatus);
+		this.statusHeader = "1";
 	}
 	else if (res_id == '2')
 	{
@@ -79,17 +95,14 @@ function updateLogisticsOverview(gps_ts, lat, lon, res_id) {
 		$('#status-header').text("Medical Aid");
 		$('#card-trans-time').text(gps_ts);
 		$('#card-coordinates').text(lat + ", " + lon);
-		$('#card-status').text("PENDING");
+		$('#card-status').text(cardStatus);
+		this.statusHeader = "2";
 	}
 }
 
 $(document).ready(function(e) {
 	// Connect to server
 	var socket = io.connect('http://' + document.domain + ':' + location.port);
-	// Var cache the previous broadcast message
-	var old_broadcast_message = '';
-	// Var cache the logistics response
-	var old_logistics_message = 'P';
 	// Set UI on data_stream message 
 	socket.on('data_stream', function(msg) {
 		// Fade in the info tab upon receiving first signal
@@ -106,7 +119,7 @@ $(document).ready(function(e) {
 			// Update logistics card
 			updateLogisticsOverview(msg.gps_ts, msg.lat, msg.lon, msg.res);
 			// Fade in the logistics card
-			$('#logistics-card').fadeIn(500).css("display", "inline-block");;
+			$('#logistics-card').fadeIn(500).css("display", "inline-block");
 		} 
 		else if (msg.res == '1') 
 		{
@@ -118,7 +131,7 @@ $(document).ready(function(e) {
 			// Update logistics card
 			updateLogisticsOverview(msg.gps_ts, msg.lat, msg.lon, msg.res);
 			// Fade in the logistics card
-			$('#logistics-card').fadeIn(500).css("display", "inline-block");;
+			$('#logistics-card').fadeIn(500).css("display", "inline-block");
 		} 
 		else if (msg.res == '2') 
 		{
@@ -130,7 +143,7 @@ $(document).ready(function(e) {
 			// Update logistics card
 			updateLogisticsOverview(msg.gps_ts, msg.lat, msg.lon, msg.res);
 			// Fade in the logistics card
-			$('#logistics-card').fadeIn(500).css("display", "inline-block");;
+			$('#logistics-card').fadeIn(500).css("display", "inline-block");
 		}
 		else
 		{
@@ -183,4 +196,17 @@ $(document).ready(function(e) {
 	    	status: 'C'
 	    });
 	});
+});
+
+// Observe change in card text
+$(function(){
+    //Store the test paragraph node
+    var statusHeader = $('#status-header');
+    //Observe the paragraph
+    this.observer = new MutationObserver(function(mutations) {
+    	// if ( ) {
+    	// 	$('#card-status').text("PENDING");
+    	// }
+    }.bind(this));
+    this.observer.observe(statusHeader.get(0), {characterData: true, childList: true});
 });
