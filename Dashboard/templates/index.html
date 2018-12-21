@@ -49,6 +49,29 @@
 			<div id="map_canvas" class="gmap">
 				📡 &nbsp;No Signal
 			</div>
+			<!-- Logistics backbone -->
+			<div class="section-header">
+				<h3 class="section-title">Logistics Overview</h3>
+			</div>
+			<!-- WARNING: Card for one user only -->
+			<div class="logistics-section">
+				<div id="logistics-card" class="card">
+					<h3 class="card-header" id="status-header">-</h3>
+					<hr class="hr-rule">
+					<!-- To be set by JS -->
+					<p>Transmission Time: <b id="card-trans-time">-</b></p>
+					<p>Coordinates: <b id="card-coordinates">-</b></p>
+					<p>Status: <b id="card-status">-</b></p>
+					<!-- Dropdown to choose status -->
+					<div class="status-dropdown">
+					  <button onclick="statusOptions()" class="status-dropbtn">RESPOND</button>
+					  <div id="statusDropList" class="status-dropdown-content">
+					    <p id="status-inprocess">In Process</p>
+					    <p id="status-complete">Complete</p>
+					  </div>
+					</div>
+				</div>
+			</div>
 			<!-- Pre & post event data section -->
 			<div class="section-header">
 				<h3 class="section-title">Pre & Post Event Data</h3>

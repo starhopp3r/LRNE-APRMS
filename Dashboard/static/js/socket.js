@@ -55,8 +55,42 @@ function google_map(gps_ts, lat, lon, res_id) {
 	marker.setMap(map);
 }
 
+function updateLogisticsOverview(gps_ts, lat, lon, res_id) {
+	// Change the text in the card
+	if (res_id == '0')
+	{
+		// Ration
+		$('#status-header').text("Ration");
+		$('#card-trans-time').text(gps_ts);
+		$('#card-coordinates').text(lat + ", " + lon);
+		$('#card-status').text("PENDING");
+	}
+	else if (res_id == '1')
+	{
+		// Shelter
+		$('#status-header').text("Shelter");
+		$('#card-trans-time').text(gps_ts);
+		$('#card-coordinates').text(lat + ", " + lon);
+		$('#card-status').text("PENDING");
+	}
+	else if (res_id == '2')
+	{
+		// Medical Aid
+		$('#status-header').text("Medical Aid");
+		$('#card-trans-time').text(gps_ts);
+		$('#card-coordinates').text(lat + ", " + lon);
+		$('#card-status').text("PENDING");
+	}
+}
+
 $(document).ready(function(e) {
+	// Connect to server
 	var socket = io.connect('http://' + document.domain + ':' + location.port);
+	// Var cache the previous broadcast message
+	var old_broadcast_message = '';
+	// Var cache the logistics response
+	var old_logistics_message = 'P';
+	// Set UI on data_stream message 
 	socket.on('data_stream', function(msg) {
 		// Fade in the info tab upon receiving first signal
 		$('#info-tab').fadeIn(1000);
@@ -69,6 +103,10 @@ $(document).ready(function(e) {
 			$('#aid').text('0');
 			// Render map
 			google_map(msg.gps_ts, msg.lat, msg.lon, msg.res);
+			// Update logistics card
+			updateLogisticsOverview(msg.gps_ts, msg.lat, msg.lon, msg.res);
+			// Fade in the logistics card
+			$('#logistics-card').fadeIn(500).css("display", "inline-block");;
 		} 
 		else if (msg.res == '1') 
 		{
@@ -77,6 +115,10 @@ $(document).ready(function(e) {
 			$('#aid').text('0');
 			// Render map
 			google_map(msg.gps_ts, msg.lat, msg.lon, msg.res);
+			// Update logistics card
+			updateLogisticsOverview(msg.gps_ts, msg.lat, msg.lon, msg.res);
+			// Fade in the logistics card
+			$('#logistics-card').fadeIn(500).css("display", "inline-block");;
 		} 
 		else if (msg.res == '2') 
 		{
@@ -85,6 +127,10 @@ $(document).ready(function(e) {
 			$('#aid').text('1');
 			// Render map
 			google_map(msg.gps_ts, msg.lat, msg.lon, msg.res);
+			// Update logistics card
+			updateLogisticsOverview(msg.gps_ts, msg.lat, msg.lon, msg.res);
+			// Fade in the logistics card
+			$('#logistics-card').fadeIn(500).css("display", "inline-block");;
 		}
 		else
 		{
@@ -94,5 +140,47 @@ $(document).ready(function(e) {
 			// Render map
 			google_map(msg.gps_ts, msg.lat, msg.lon, msg.res);
 		}
+	});
+
+	// Broadcast message when the user hits enter key
+	$(".dialog-text").on('keyup', function (e) {
+	    if (e.keyCode == 13) {
+	    	// Set var cache
+	    	old_broadcast_message = $('.dialog-text').val();
+	    	// Emit broadcast message
+	        socket.emit('broadcast_msg', {
+	        	msg: $('.dialog-text').val(),
+	        	status: old_logistics_message
+	        });
+	        // Close the broadcast dialog box
+	        $("#broadcast-dialog").fadeOut(200);
+	        // Clear input value
+	        $('.dialog-text').val('');
+	    }
+	});
+
+	// Status dropdown listeners
+	$('#status-inprocess').click(function() {
+		// Set the var cache
+		old_logistics_message = 'I';
+		// In process
+		$('#card-status').text("IN PROCESS");
+		// Emit broadcast message
+	    socket.emit('broadcast_msg', {
+	    	msg: old_broadcast_message,
+	    	status: 'I'
+	    });
+	});
+
+	$('#status-complete').click(function() {
+		// Set the var cache
+		old_logistics_message = 'C';
+		// Complete
+		$('#card-status').text("COMPLETE");
+		// Emit broadcast message
+	    socket.emit('broadcast_msg', {
+	    	msg: old_broadcast_message,
+	    	status: 'C'
+	    });
 	});
 });

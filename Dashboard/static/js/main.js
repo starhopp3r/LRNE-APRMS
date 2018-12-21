@@ -11,6 +11,12 @@ function mapOptions() {
   document.getElementById("myDropdown").classList.toggle("show");
 }
 
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function statusOptions() {
+  document.getElementById("statusDropList").classList.toggle("look");
+}
+
 // Close the dropdown if the user clicks outside of it
 window.onclick = function(event) {
   if (!event.target.matches('.dropbtn')) {
@@ -19,6 +25,18 @@ window.onclick = function(event) {
       var openDropdown = dropdowns[i];
       if (openDropdown.classList.contains('show')) {
         openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+
+window.onclick = function(event) {
+  if (!event.target.matches('.status-dropbtn')) {
+    var dropdowns = document.getElementsByClassName("status-dropdown-content");
+    for (var i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('look')) {
+        openDropdown.classList.remove('look');
       }
     }
   }

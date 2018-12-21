@@ -21,3 +21,5 @@ Tested locally on my development machine, MacBook Pro running macOS Mojave (v10.
 POST endpoint: `http://0.0.0.0:5000/inlet`
 
 Dashboard endpoint: `http://0.0.0.0:5000/`
+
+To launch server: `FLASK_ENV=development FLASK_APP=server.py DEBUG=True flask run --host=0.0.0.0`
