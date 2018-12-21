@@ -197,16 +197,3 @@ $(document).ready(function(e) {
 	    });
 	});
 });
-
-// Observe change in card text
-$(function(){
-    //Store the test paragraph node
-    var statusHeader = $('#status-header');
-    //Observe the paragraph
-    this.observer = new MutationObserver(function(mutations) {
-    	// if ( ) {
-    	// 	$('#card-status').text("PENDING");
-    	// }
-    }.bind(this));
-    this.observer.observe(statusHeader.get(0), {characterData: true, childList: true});
-});
