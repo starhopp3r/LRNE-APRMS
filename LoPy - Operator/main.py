@@ -10,9 +10,9 @@ import machine
 import socket
 
 # Constants
-WIFI_SSID = "<wifi ssid here>"
-WIFI_PASSWORD = "<wifi password here>"
-POST_IP = "<post ip here>"
+WIFI_SSID = "Lim Zone Portable"
+WIFI_PASSWORD = "pyrd7990"
+POST_IP = "192.168.43.116"
 POST_PORT = 5000
 
 # LoRa init
@@ -34,8 +34,14 @@ def http_post(addr, port, data):
     __data = bytes("POST /inlet HTTP/1.1\r\nHost: {:s}:{:d}\r\nContent-Type: text/plain\r\nContent-Length: {:d}\r\n\r\n".format(addr, port, len(data)), "utf8") + data # data is already bytes
     tcp_s.connect(socket.getaddrinfo(addr, port)[0][-1])
     tcp_s.send(__data)
-    tcp_s.recv(256)
+    tcp_s.setblocking(True)
+    ok_message = tcp_s.recv(256)
     tcp_s.close()
+    return strip_headers(ok_message)
+
+# Discards all the HTTP headers until the body
+def strip_headers(data):
+    return data.split(b"\r\n")[-1]
 
 # Do work with data
 if __name__ == "__main__":
@@ -48,4 +54,7 @@ if __name__ == "__main__":
             continue # we haven't recieved the full buffer
 
         # Send the buffer
-        http_post(POST_IP, POST_PORT, buf)
+        ok_message = http_post(POST_IP, POST_PORT, buf)
+
+        # Transmit the ok message back to the slave(s) NOTE: Hacky hack hack
+        s.send(ok_message)
