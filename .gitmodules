@@ -1,0 +1,3 @@
+[submodule "Official Pycom Library"]
+	path = Official Pycom Library
+	url = git@github.com:pycom/pycom-libraries.git

@@ -19,7 +19,7 @@ s.setsockopt(socket.SOL_LORA, socket.SO_DR, 0) # set data rate
 
 while True:
     s.setblocking(False)
-    s.send(b'0,16/12/18 11:08,51.174693,-3.061574,11')
+    s.send(b'0,16/12/18 11:08,51.174693,-3.061574,0')
     s.settimeout(5)
     try:
         ok_message = s.recv(64)
