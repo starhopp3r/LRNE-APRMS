@@ -1,3 +1,5 @@
+// Connect to server
+var socket = io.connect('http://' + document.domain + ':' + location.port);
 // Var cache the previous broadcast message
 var old_broadcast_message = '';
 // Var cache the logistics response
@@ -63,8 +65,10 @@ function google_map(gps_ts, lat, lon, res_id) {
 function updateLogisticsOverview(gps_ts, lat, lon, res_id) {
 	// keep the card status constant
 	var cardStatus = "";
+	// Set cardStatus
 	if (this.statusHeader != res_id || old_logistics_message == 'P') {
 		cardStatus = "PENDING";
+		old_logistics_message = 'P';
 	} else if (old_logistics_message == 'I') {
 		cardStatus = "IN PROCESS";
 	} else if (old_logistics_message == 'C') {
@@ -98,11 +102,14 @@ function updateLogisticsOverview(gps_ts, lat, lon, res_id) {
 		$('#card-status').text(cardStatus);
 		this.statusHeader = "2";
 	}
+	// Emit broadcast message
+    socket.emit('broadcast_msg', {
+    	msg: old_broadcast_message,
+    	status: old_logistics_message
+    });
 }
 
 $(document).ready(function(e) {
-	// Connect to server
-	var socket = io.connect('http://' + document.domain + ':' + location.port);
 	// Set UI on data_stream message 
 	socket.on('data_stream', function(msg) {
 		// Fade in the info tab upon receiving first signal
