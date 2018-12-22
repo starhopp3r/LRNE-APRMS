@@ -7,39 +7,22 @@ window.onbeforeunload = function () {
 
 /* When the user clicks on the button, 
 toggle between hiding and showing the dropdown content */
-function mapOptions() {
+function mapOptions(event) {
+  event.stopPropagation();
   document.getElementById("myDropdown").classList.toggle("show");
 }
 
 /* When the user clicks on the button, 
 toggle between hiding and showing the dropdown content */
-function statusOptions() {
+function statusOptions(event) {
+  event.stopPropagation();
   document.getElementById("statusDropList").classList.toggle("look");
 }
 
-// Close the dropdown if the user clicks outside of it
+// Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
-  if (!event.target.matches('.dropbtn')) {
-    var dropdowns = document.getElementsByClassName("dropdown-content");
-    for (var i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-      }
-    }
-  }
-}
-
-window.onclick = function(event) {
-  if (!event.target.matches('.status-dropbtn')) {
-    var dropdowns = document.getElementsByClassName("status-dropdown-content");
-    for (var i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('look')) {
-        openDropdown.classList.remove('look');
-      }
-    }
-  }
+  document.getElementById("myDropdown").classList.remove("show");
+  document.getElementById("statusDropList").classList.remove("look");
 }
 
 $(document).ready(function(e) {
@@ -72,13 +55,13 @@ $(document).ready(function(e) {
 	// Dropdown listner
 	$('#satImg').click(function() {
 		// Show satellite imagery
-		slider.rightImage.children[0].src = serveLoc + "/static/img/2014.jpg"
-		juxtapose.scanPage()
+		slider.rightImage.children[0].src = serveLoc + "/static/img/2014.jpg";
+		juxtapose.scanPage();
 	});
 
 	$('#cvAnalysis').click(function() {
 		// Show computer vision analysis
-		slider.rightImage.children[0].src = serveLoc + "/static/img/diff.jpg"
-		juxtapose.scanPage()
+		slider.rightImage.children[0].src = serveLoc + "/static/img/diff.jpg";
+		juxtapose.scanPage();
 	});
 });

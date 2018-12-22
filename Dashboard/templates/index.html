@@ -64,7 +64,7 @@
 					<p>Status: <b id="card-status">-</b></p>
 					<!-- Dropdown to choose status -->
 					<div class="status-dropdown">
-					  <button onclick="statusOptions()" class="status-dropbtn">RESPOND</button>
+					  <button onclick="statusOptions(event)" class="status-dropbtn">RESPOND</button>
 					  <div id="statusDropList" class="status-dropdown-content">
 					    <p id="status-inprocess">In Process</p>
 					    <p id="status-complete">Complete</p>
@@ -78,7 +78,7 @@
 			</div>
 			<!-- Dropdown list to select different maps -->
 			<div class="dropdown">
-			  <button onclick="mapOptions()" class="dropbtn">Map Options</button>
+			  <button onclick="mapOptions(event)" class="dropbtn">Map Options</button>
 			  <div id="myDropdown" class="dropdown-content">
 			    <p id="satImg">Satellite Imagery</p>
 			    <p id="cvAnalysis">Computer Vision Analysis</p>

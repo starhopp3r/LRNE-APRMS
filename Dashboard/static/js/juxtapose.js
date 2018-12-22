@@ -711,7 +711,7 @@
 
   //Enable HTML Implementation
   juxtapose.scanPage = function() {
-      //s u d o hacky hack hack: delete all existing sliders
+      // s u d o_ hacky hack hack: delete all existing sliders
       var sliders = document.getElementsByClassName("jx-slider");
       for (var i = 0; i < sliders.length; i++) {
         sliders[i].parentNode.removeChild(sliders[i]);
