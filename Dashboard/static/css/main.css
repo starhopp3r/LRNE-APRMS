@@ -23,6 +23,10 @@ p {
     font-family: 'Brandon Grotesque', Helvetica, sans-serif;
 }
 
+b {
+    font-weight: 500;
+}
+
 button:focus { 
     outline: none; 
 }
@@ -43,8 +47,9 @@ button:focus {
 
 .enter {
 	font-family: 'Brandon Grotesque', Helvetica, sans-serif;
-	font-size: 54pt;
-    font-weight: 200;
+	font-size: 60px;
+    font-weight: 500;
+    line-height: 48px;
 	color: #fff;
 }
 
@@ -82,7 +87,7 @@ button:focus {
     margin: 0;
     margin-top: 3px;
     margin-left: 12px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .hr-rule {
@@ -121,6 +126,7 @@ button:focus {
 .section-title {
     margin: 0;
     margin-left: 12px;
+    font-weight: 500;
 }
 
 #top-header {
@@ -149,7 +155,7 @@ button:focus {
     display: inline-block;
     font-family: 'Brandon Grotesque', Helvetica, sans-serif;
     font-size: 12pt;
-    font-weight: 600;
+    font-weight: 500;
     border-radius: 8px;
     margin: 0;
     margin-top: 15px;
@@ -175,7 +181,7 @@ button:focus {
     right: 0;
     bottom: 0;
     left: 0;
-    width: 600px;
+    width: 500px;
     height: 120px;
     /* Background and foreground color*/
     color: #fff;
@@ -193,6 +199,7 @@ button:focus {
 
 .dialog-heading {
     margin: 0;
+    font-weight: 500;
 }
 
 .dialog-text {
@@ -296,6 +303,7 @@ button:focus {
     padding-top: 3px;
     padding-bottom: 3px;
     border-radius: 8px;
+    font-weight: 400;
 }
 
 /* Status dropdown */
@@ -309,7 +317,7 @@ button:focus {
     border-radius: 3px;
     cursor: pointer;
     font-family: 'Brandon Grotesque', Helvetica, sans-serif;
-    font-weight: 600;
+    font-weight: 500;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 }
 
