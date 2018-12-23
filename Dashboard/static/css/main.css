@@ -1,15 +1,26 @@
+@font-face {
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    src: url("../fonts/Brandon_reg.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    font-weight: bold;
+    src: url("../fonts/Brandon_bld.otf") format("opentype");
+}
+
 body {
 	margin: 0;
     background-color: rgb(51, 51, 51);
 }
 
 h3 {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
     font-size: 23pt;
 }
 
 p {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
 }
 
 button:focus { 
@@ -31,8 +42,9 @@ button:focus {
 }
 
 .enter {
-	font-family: 'Josefin Sans', sans-serif;
+	font-family: 'Brandon Grotesque', Helvetica, sans-serif;
 	font-size: 54pt;
+    font-weight: 200;
 	color: #fff;
 }
 
@@ -46,8 +58,8 @@ button:focus {
     /* Positioning */
     top: calc(20% + 2px);
     z-index: 1;
-    width: 250px;
-    height: 260px;
+    width: 260px;
+    height: 275px;
     position: absolute;
     /* Background and foreground color*/
     color: #fff;
@@ -68,19 +80,30 @@ button:focus {
 
 .float-div-title {
     margin: 0;
+    margin-top: 3px;
     margin-left: 12px;
+    font-weight: 600;
 }
 
 .hr-rule {
     height: 1px;
     border-width: 0;
-    color: rgb(59, 59, 59);
-    background-color: rgb(59, 59, 59); 
+    color: rgb(65, 65, 65);
+    background-color: rgb(65, 65, 65); 
+}
+
+
+.hr-rule-vital {
+    height: 1px;
+    margin-top: 0;
+    border-width: 0;
+    color: rgb(65, 65, 65);
+    background-color: rgb(65, 65, 65); 
 }
 
 .float-info {
     margin: 0;
-    margin-top: 15px;
+    margin-top: 12px;
     margin-left: 12px;
 }
 
@@ -112,11 +135,11 @@ button:focus {
     line-height: calc(100vh - 75px);
     width: 100%; 
     height: calc(100% - 75px);
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
     font-size: 32pt;
 }
 
-.broadcast_button {
+.broadcast-button {
     background-color: #fff;
     border: none;
     color: #000;
@@ -124,21 +147,21 @@ button:focus {
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
     font-size: 12pt;
-    font-weight: 900;
+    font-weight: 600;
     border-radius: 8px;
     margin: 0;
     margin-top: 15px;
     margin-left: 12px;
 }
 
-.broadcast_button:hover {
+.broadcast-button:hover {
     background: #000;
     color: #fff;
 }
 
-.broadcast_button:active {
+.broadcast-button:active {
     background: #000;
     color: #fff;
 }
@@ -175,13 +198,14 @@ button:focus {
 .dialog-text {
     width: 100%;
     padding: 12px 8px;
-    margin: 24px 0;
+    margin: 15px 0;
     display: inline-block;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 14pt;
-    font-family: 'Montserrat', sans-serif;
+    text-transform: uppercase;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
 }
 
 /* Dropdown map options */
@@ -200,7 +224,7 @@ button:focus {
     white-space: nowrap;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 }
 
@@ -221,11 +245,11 @@ button:focus {
     right: 0;
     position: absolute;
     background-color: rgb(50, 50, 50);
-    min-width: 236px;
+    min-width: 180px;
     overflow: auto;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
 }
 
 .dropdown-content p {
@@ -257,7 +281,7 @@ button:focus {
   border-radius: 8px;
   padding: 12px;
   display: none;
-  height: 221px;
+  height: 250px;
   margin: 1rem;
   position: relative;
   width: 300px;
@@ -266,7 +290,7 @@ button:focus {
 
 .card-header {
     margin: 0;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
     border: 2px solid #fff;
     text-align: center;
     padding-top: 3px;
@@ -284,7 +308,8 @@ button:focus {
     border: none;
     border-radius: 3px;
     cursor: pointer;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    font-weight: 600;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 }
 
@@ -301,12 +326,12 @@ button:focus {
 .status-dropdown-content {
     display: none;
     position: absolute;
-    min-width: 120px;
+    min-width: 130px;
     background-color: rgb(50, 50, 50);
     overflow: auto;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
 }
 
 .status-dropdown-content p {
@@ -326,10 +351,10 @@ button:focus {
     display: block;
 }
 
-#splash-text {
+.logistics-placeholder {
     margin: 0;
     color: #fff;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
     font-size: 32pt;
     text-align: center;
     vertical-align: middle;
@@ -338,7 +363,7 @@ button:focus {
 
 /* Customise JuxtaposeJS to match branding */
 .jx-label {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
 }
 
 .jx-knightlab {

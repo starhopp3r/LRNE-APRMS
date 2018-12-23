@@ -78,7 +78,7 @@ function updateLogisticsOverview(gps_ts, lat, lon, res_id) {
 	if (res_id == '0')
 	{
 		// Ration
-		$('#status-header').text("Ration");
+		$('#status-header').text("RATION");
 		$('#card-trans-time').text(gps_ts);
 		$('#card-coordinates').text(lat + ", " + lon);
 		$('#card-status').text(cardStatus);
@@ -87,7 +87,7 @@ function updateLogisticsOverview(gps_ts, lat, lon, res_id) {
 	else if (res_id == '1')
 	{
 		// Shelter
-		$('#status-header').text("Shelter");
+		$('#status-header').text("SHELTER");
 		$('#card-trans-time').text(gps_ts);
 		$('#card-coordinates').text(lat + ", " + lon);
 		$('#card-status').text(cardStatus);
@@ -96,7 +96,7 @@ function updateLogisticsOverview(gps_ts, lat, lon, res_id) {
 	else if (res_id == '2')
 	{
 		// Medical Aid
-		$('#status-header').text("Medical Aid");
+		$('#status-header').text("MEDICAL AID");
 		$('#card-trans-time').text(gps_ts);
 		$('#card-coordinates').text(lat + ", " + lon);
 		$('#card-status').text(cardStatus);
@@ -127,6 +127,8 @@ $(document).ready(function(e) {
 			updateLogisticsOverview(msg.gps_ts, msg.lat, msg.lon, msg.res);
 			// Fade in the logistics card
 			$('#logistics-card').fadeIn(500).css("display", "inline-block");
+			// Fade out placeholder text
+			$('#splash-text').fadeIn(500).css("display", "none");
 		} 
 		else if (msg.res == '1') 
 		{
@@ -139,6 +141,8 @@ $(document).ready(function(e) {
 			updateLogisticsOverview(msg.gps_ts, msg.lat, msg.lon, msg.res);
 			// Fade in the logistics card
 			$('#logistics-card').fadeIn(500).css("display", "inline-block");
+			// Fade out placeholder text
+			$('#splash-text').fadeIn(500).css("display", "none");
 		} 
 		else if (msg.res == '2') 
 		{
@@ -151,6 +155,8 @@ $(document).ready(function(e) {
 			updateLogisticsOverview(msg.gps_ts, msg.lat, msg.lon, msg.res);
 			// Fade in the logistics card
 			$('#logistics-card').fadeIn(500).css("display", "inline-block");
+			// Fade out placeholder text
+			$('#splash-text').fadeIn(500).css("display", "none");
 		}
 		else
 		{

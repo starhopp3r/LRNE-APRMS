@@ -11,9 +11,6 @@
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
 		<!-- Google Maps JavaScript API -->
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=true_or_false&key=AIzaSyBKw8yu7hpiwYnN66qNcSqcnh8KvjH6Hw8"></script>
-		<!-- Google Fonts-->
-		<link href="https://fonts.googleapis.com/css?family=Josefin+Sans" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
 		<!-- Javascript files -->
 		<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/socket.js') }}"></script>
@@ -23,71 +20,72 @@
 	<body>
 		<!-- Splashscreen -->
 		<div id="splashscreen">
-			<p class="enter">🧭 Compass</p>
+			<p class="enter">🧭 COMPASS</p>
 		</div>
 		<!-- Broadcast dialog box -->
 		<div id="broadcast-dialog" class="broadcast-dialog">
-			<h3 class="dialog-heading">Broadcast Message</h3>
+			<h3 class="dialog-heading">BROADCAST MESSAGE</h3>
 			<input type="text" name="broadcast-textbox" class="dialog-text">
 		</div>
 		<!-- Main content -->
 		<div class="main-container">
 			<div id="top-header" class="section-header">
-				<h3 class="section-title">Mission Overview</h3>
+				<h3 class="section-title">MISSION OVERVIEW</h3>
 			</div>
 			<!-- Mission information tab -->
 			<div id="info-tab" class="float-div">
-				<h3 class="float-div-title">Vitals</h3>
+				<h3 class="float-div-title">VITALS</h3>
 				<hr class="hr-rule">
-				<p class="float-info">Active Handsets: <b id="handsets">0</b></p>
-				<p class="float-info">Requests for Ration: <b id="ration">0</b></p>
-				<p class="float-info">Requests for Shelter: <b id="shelter">0</b></p>
-				<p class="float-info">Requests for Medical Aid: <b id="aid">0</b></p>
-				<button id="broadcast-btn" class="broadcast_button">BROADCAST</button>
+				<p class="float-info">ACTIVE HANDSETS: &nbsp;<b id="handsets">0</b></p>
+				<p class="float-info">REQUESTS FOR RATION: &nbsp;<b id="ration">0</b></p>
+				<p class="float-info">REQUESTS FOR SHELTER: &nbsp;<b id="shelter">0</b></p>
+				<p class="float-info">REQUESTS FOR MEDICAL AID: &nbsp;<b id="aid">0</b></p>
+				<button id="broadcast-btn" class="broadcast-button">BROADCAST</button>
 			</div>
 			<!-- Main map -->
 			<div id="map_canvas" class="gmap">
-				📡 &nbsp;No Signal
+				📡 &nbsp;NO SIGNAL
 			</div>
 			<!-- Logistics backbone -->
 			<div class="section-header">
-				<h3 class="section-title">Logistics Overview</h3>
+				<h3 class="section-title">LOGISTICS OVERVIEW</h3>
 			</div>
 			<!-- WARNING: Card for one user only -->
 			<div class="logistics-section">
+				<p id="splash-text" class="logistics-placeholder">NO REQUESTS</p>
 				<div id="logistics-card" class="card">
 					<h3 class="card-header" id="status-header">-</h3>
 					<hr class="hr-rule">
 					<!-- To be set by JS -->
-					<p>Transmission Time: <b id="card-trans-time">-</b></p>
-					<p>Coordinates: <b id="card-coordinates">-</b></p>
-					<p>Status: <b id="card-status">-</b></p>
+					<p>TRANSMISSION TIME: <b id="card-trans-time">-</b></p>
+					<p>COORDINATES: <b id="card-coordinates">-</b></p>
+					<p>STATUS: <b id="card-status">-</b></p>
 					<!-- Dropdown to choose status -->
 					<div class="status-dropdown">
 					  <button onclick="statusOptions(event)" class="status-dropbtn">RESPOND</button>
 					  <div id="statusDropList" class="status-dropdown-content">
-					    <p id="status-inprocess">In Process</p>
-					    <p id="status-complete">Complete</p>
+					    <p id="status-inprocess">IN PROCESS</p>
+					    <p id="status-complete">COMPLETE</p>
 					  </div>
 					</div>
 				</div>
 			</div>
 			<!-- Pre & post event data section -->
 			<div class="section-header">
-				<h3 class="section-title">Pre & Post Event Data</h3>
+				<h3 class="section-title">PRE & POST EVENT DATA</h3>
 			</div>
 			<!-- Dropdown list to select different maps -->
 			<div class="dropdown">
-			  <button onclick="mapOptions(event)" class="dropbtn">Map Options</button>
+			  <button onclick="mapOptions(event)" class="dropbtn">MAP OPTIONS</button>
 			  <div id="myDropdown" class="dropdown-content">
-			    <p id="satImg">Satellite Imagery</p>
-			    <p id="cvAnalysis">Computer Vision Analysis</p>
+			    <p id="satImg">SATELLITE IMAGERY</p>
+			    <p id="cvAnalysis">TERRAIN ANALYSIS</p>
 			  </div>
 			</div>
 			<!-- Multiple map options with slider -->
 			<div id="sat-img" class="juxtapose" data-startingposition="50%">
-				<img src="{{ url_for('static', filename='img/2013.jpg') }}" data-label="Before Flood"/>
-				<img src="{{ url_for('static', filename='img/2014.jpg') }}" data-label="After Flood"/>
+				<img src="{{ url_for('static', filename='img/2013.jpg') }}" data-label="BEFORE FLOOD"/>
+				<img src="{{ url_for('static', filename='img/2014.jpg') }}" data-label="AFTER FLOOD"/>
 			</div>
 			<!-- JuxtaposeJS -->
 			<script src="{{ url_for('static', filename='js/juxtapose.js') }}"></script>
