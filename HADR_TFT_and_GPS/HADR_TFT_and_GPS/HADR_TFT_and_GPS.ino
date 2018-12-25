@@ -3,6 +3,7 @@
 #include <avr/pgmspace.h>
 #include <SoftwareSerial.h>
 #include <TinyGPS.h>
+#include <avr/sleep.h>
 
 //========================================================
 // Reference for  s u d o
@@ -68,6 +69,8 @@
 
 // Defining other constants
 #define TRANSMIT_TIME 5000 // in ms
+#define IDLE_TIME 30000 // in ms
+#define ON 0 // default on state
 
 
 // defining some bitmaps
@@ -427,6 +430,8 @@ const unsigned char transSq [] PROGMEM = {
 void normalDisplay(void);
 void optionSelectionUI(void);
 bool gpsDetect(void);
+void sleepFunc(void);
+void interruptSleep(void);
 //==============================================================================================
 
 
@@ -438,13 +443,16 @@ bool gpsDetect(void);
 
 MCUFRIEND_kbv tft;
 String Message;
-SoftwareSerial gpsSerial (A7, A6); //A7 to GPS TX, A6 tp GPS RX
+SoftwareSerial gpsSerial (13, 12); //13 to GPS TX, 12 tp GPS RX
 TinyGPS gps;
 bool newdata = false;
 unsigned long startTime = millis();
 float flat, flon;
 unsigned long fix_age = 1; // returns +- latitude/longitude in degrees
-unsigned int count=0;
+unsigned int count = 0;
+unsigned int screenOn = millis();
+byte wakePin = 2;
+byte onOffMechPin = 10;
 
 //==============================================================================================
 
@@ -452,16 +460,18 @@ void setup() {
   Serial.begin(9600);
   Serial.println("SudoX rescue handset ready!");
   gpsSerial.begin(9600);
-  gpsSerial.print("!UBX CFG-GPS0 1"); // send to low power mode
+  //gpsSerial.print("!UBX CFG-GPS0 1"); // send to low power mode
   Serial.print("Sizeof(gpsobject) = ");
   Serial.println(sizeof(TinyGPS));
   Serial.println();
+  pinMode(onOffMechPin,OUTPUT);
+  digitalWrite(onOffMechPin,ON);
   tft.reset();
   uint16_t identifier = tft.readID();
   tft.begin(identifier);
   tft.fillScreen(BLACK);
   tft.setRotation(3);
-  unsigned long start = micros();
+  //unsigned long start = micros();
   tft.setCursor(5, 25);
   tft.setTextColor(WHITE);
   tft.setTextSize(4);
@@ -477,18 +487,51 @@ void setup() {
   tft.setCursor(80, 180);
   tft.print("Message:");
   tft.print(Message);
+  //pinMode(wakePin, INPUT);
 }
 
 void loop() {
-  //optionSelectionUI();
-  if (!gpsDetect())count++;
-  Serial.print("Missed Transmission Cycle: ");Serial.print(count);
+  if (millis() - screenOn > IDLE_TIME) {
+    screenOn = millis();
+    digitalWrite(onOffMechPin, !ON); // turn off screen
+    Serial.println("Sleeping...");
+    delay(100);
+    sleepFunc();
+    Serial.println("Wake up!");
+    digitalWrite(onOffMechPin, ON);
+
+    //follow the setup, but Message is not changed.
+    tft.reset();
+    uint16_t identifier = tft.readID();
+    tft.begin(identifier);
+    tft.fillScreen(BLACK);
+    tft.setRotation(3);
+    //unsigned long start = micros();
+    tft.setCursor(5, 25);
+    tft.setTextColor(WHITE);
+    tft.setTextSize(4);
+    // Write Rescue is on the way
+    tft.println("HELP IS HERE!");
+    pinMode(BUTTON, INPUT);
+    tft.setTextSize(2);
+    normalDisplay();
+    tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
+    tft.setCursor(80, 180);
+    tft.print("Message:");
+    tft.print(Message);
+  }
+  optionSelectionUI();
+  if (!gpsDetect() && (newdata == true)) {
+    count++;
+    Serial.print("Missed Transmission Cycle: "); Serial.print(count);
+  }
+
+
 }
 
 void normalDisplay() {
   // We draw 3 circles horizontal in the screen with the icons
   // size R = 51, distance betwen each circle is 10
-  // 1st circle + put my face
   tft.drawRoundRect(2, tft.height() / 2 - 51, 102, 102, 51, BLUE);
   tft.fillRoundRect(2, tft.height() / 2 - 51, 102, 102, 51, BLUE);
   tft.drawBitmap(3, tft.height() / 2 - 50 , shelter, 100, 100, WHITE);
@@ -505,6 +548,7 @@ void normalDisplay() {
 
 void optionSelectionUI() {
   if (analogRead(BUTTON) > 100) {
+    screenOn = millis(); // reset time to sleep
     if (analogRead(BUTTON) < 700) {
       tft.setCursor(90, 180);
       if (Message == "Shelter") {
@@ -560,6 +604,7 @@ bool gpsDetect() {
 
   if (gpsSerial.available() && (millis() - startTime > TRANSMIT_TIME)) {
     gps.f_get_position(&flat, &flon, &fix_age);
+    startTime = millis();
     if (fix_age == TinyGPS::GPS_INVALID_AGE) {
       Serial.println("Critical: location not fixed!");
       newdata = false;
@@ -572,18 +617,36 @@ bool gpsDetect() {
       Serial.println("GPS detected");
       newdata = true;
     }
-
+    // code to James
     Serial.print("Latitude:"); Serial.print(flat);
-    Serial.print("Longitude:"); Serial.print(flon);
-    Serial.print("Last Seen:"); Serial.println(fix_age);
+    Serial.print("Longitude:"); Serial.println(flon);
+    Serial.print("Last Seen:"); Serial.println(fix_age); Serial.println("");
+    return true;
   }
-  else newdata = false;
-  if (newdata) {
-    //transmit code to loPy (to James)
-  }
-  else if (!newdata && (millis() - startTime > TRANSMIT_TIME)) {
+  else {
+    newdata = false;
+    //Serial.print("Latitude:"); Serial.print(flat);
+    //Serial.print("Longitude:"); Serial.print(flon);
+    //Serial.print("Last Seen:"); Serial.println(fix_age);
     return false;
+
   }
-  return true;
+
 }
 
+void sleepFunc() {
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_enable();
+  //sleep_bod_disable();
+  pinMode(wakePin, INPUT); // set pin2 to be input pin
+  attachInterrupt(0, interruptSleep, FALLING);
+  sleep_mode();// *requires checking: does it sleep the cpu and bod as well?
+  sleep_disable();
+  detachInterrupt(0);
+}
+
+void interruptSleep() {
+  //make the code here short!
+  screenOn = millis();
+  digitalWrite(onOffMechPin, !ON);
+}
