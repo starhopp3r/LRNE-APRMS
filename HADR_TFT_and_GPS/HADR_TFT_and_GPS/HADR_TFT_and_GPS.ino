@@ -503,14 +503,14 @@ void setup() {
   tft.setTextSize(2);
 
 
-  if (Message == 0) {
-    tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
+   if (Message == 0) {
+    selectShelter();
   }
   else if (Message == 1) {
-    tft.drawBitmap(108, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
+    selectRation();
   }
   else if (Message == 2) {
-    tft.drawBitmap(213, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
+    selectMedical();
   }
   tft.setCursor(80, 180);
   tft.print("Message:");
