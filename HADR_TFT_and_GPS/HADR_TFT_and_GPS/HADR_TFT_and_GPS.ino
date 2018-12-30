@@ -1,14 +1,15 @@
+// Done by Bryan Tee Pak Hong for Team SudoX
+
 #include <MCUFRIEND_kbv.h>
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <avr/pgmspace.h>
 #include <SoftwareSerial.h>
 #include <TinyGPS.h>
-#include <avr/sleep.h>
 
 //========================================================
-// Reference for  s u d o
+// Reference for  SudoX
 //========================================================
-// wiring with UNO or Mega2560:
+// wiring with UNO:
 //--------------POWER Pins--------------------------------
 //   5V  connects to DC 5V
 //   GND connects to Ground
@@ -27,26 +28,30 @@
 //   LCD_D5   connects to digital pin 5
 //   LCD_D6   connects to digital pin 6
 //   LCD_D7   connects to digital pin 7
-//--------------SD-card fuction Pins ----------------------
-//This Connection Only for UNO, Do not support Mega2560
-//because they use different Hardware-SPI Pins
-//SD_SS    connects to digital pin 10
-//SD_DI    connects to digital pin 11
-//SD_DO    connects to digital pin 12
-//SD_SCK   connects to digital pin 13
+
+//JSON object for SEND and RECEIVE (wrt Arduino)
+
+/*JSON object SEND
+   {
+    "user":"",
+    "latitude":"",
+    "longitude:""
+   }
+*/
 //==========================================================
 
 
 
 
 
-// These are important pins
+// These are important pins (for TFT LCD screen)
 //----------------------------------------------------------
 #define LCD_RESET A4
 #define LCD_CS A3
 #define LCD_CD A2
 #define LCD_WR A1
 #define LCD_RD A0
+//Pins 2-9 are also occupied by LCD screen
 //----------------------------------------------------------
 
 
@@ -66,11 +71,15 @@
 
 // Defining input buttons for selection:
 #define BUTTON A5
+#define CONFIRM 0 // may need to rewire some LCD screen wries, 0 is a place holder since serial monitor is used
 
 // Defining other constants
 #define TRANSMIT_TIME 5000 // in ms
 #define IDLE_TIME 30000 // in ms
 #define ON 0 // default on state
+
+// Defining device ID
+#define DEVICE_ID 0
 
 
 // defining some bitmaps
@@ -245,8 +254,8 @@ const byte shelter[] PROGMEM = {// 'shelter', 100x100px
   0x00, 0x00, 0x00, 0x00
 };
 
-// 'food', 100x100px
-const unsigned char food [] PROGMEM = {
+// 'ration', 100x100px
+const unsigned char ration [] PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x7f, 0xff, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0xff,
   0xff, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xff, 0xff, 0xff, 0xc0,
@@ -429,9 +438,18 @@ const unsigned char transSq [] PROGMEM = {
 //==============================================================================================
 void normalDisplay(void);
 void optionSelectionUI(void);
-bool gpsDetect(void);
-void sleepFunc(void);
-void interruptSleep(void);
+void gpsGetCoordinates(void);
+String encodeMessage(String);
+String parseMessage(String,byte);
+// Some functions for optionSelectUI
+void selectShelter(void);
+void deselectShelter(void);
+void selectRation(void);
+void deselectRation(void);
+void selectMedical(void);
+void deselectMedical(void);
+void callLopy(unsigned long wakeTime);
+void readLopy(void);
 //==============================================================================================
 
 
@@ -442,211 +460,237 @@ void interruptSleep(void);
 //==============================================================================================
 
 MCUFRIEND_kbv tft;
-String Message;
+byte Message = 11, c_Message = 11;
+String broadcastMessage = "", requestStatus = "";
 SoftwareSerial gpsSerial (13, 12); //13 to GPS TX, 12 tp GPS RX
+SoftwareSerial lopy (11, 10);       //11 to lopy TX, 10 to lopy RX //this is temporary as well, high chance using hardware serial
 TinyGPS gps;
-bool newdata = false;
-unsigned long startTime = millis();
-float flat, flon;
-unsigned long fix_age = 1; // returns +- latitude/longitude in degrees
-unsigned int count = 0;
-unsigned int screenOn = millis();
-byte wakePin = 2;
-byte onOffMechPin = 10;
+String msgStatus = "0";
+float flat = 0;
+float flon = 0;
+unsigned long fix_age = 1, time, date; // returns +- latitude/longitude in degrees
+unsigned long screenOn = millis();
+byte screenUp = 0;
 
 //==============================================================================================
 
 void setup() {
+
   Serial.begin(9600);
   Serial.println("SudoX rescue handset ready!");
   gpsSerial.begin(9600);
+  lopy.begin(9600);
+
   //gpsSerial.print("!UBX CFG-GPS0 1"); // send to low power mode
   Serial.print("Sizeof(gpsobject) = ");
   Serial.println(sizeof(TinyGPS));
   Serial.println();
-  pinMode(onOffMechPin,OUTPUT);
-  digitalWrite(onOffMechPin,ON);
+
   tft.reset();
   uint16_t identifier = tft.readID();
   tft.begin(identifier);
   tft.fillScreen(BLACK);
   tft.setRotation(3);
-  //unsigned long start = micros();
   tft.setCursor(5, 25);
   tft.setTextColor(WHITE);
   tft.setTextSize(4);
-  // Write Rescue is on the way
+  // Write HELP IS HERE!
   tft.println("HELP IS HERE!");
-  Message = "Shelter";
-  //pinMode(RIGHT, INPUT);
-  //pinMode(LEFT, INPUT);
-  pinMode(BUTTON, INPUT);
-  tft.setTextSize(2);
   normalDisplay();
-  tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
+
+  //Listening to LoPy, code here must change!
+  // first edits done on 30/12/2018
+  lopy.write("OK");
+  lopy.listen();
+  while (!lopy.available());
+  while (lopy.available()) {
+    Message = parseMessage(lopy.readString(),0).toInt();
+  }
+
+  pinMode(BUTTON, INPUT); // reading different voltage levels as left and right
+  pinMode(CONFIRM, INPUT); // sending this message to lopy
+  tft.setTextSize(2);
+
+
+  if (Message == 0) {
+    tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
+  }
+  else if (Message == 1) {
+    tft.drawBitmap(108, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
+  }
+  else if (Message == 2) {
+    tft.drawBitmap(213, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
+  }
   tft.setCursor(80, 180);
   tft.print("Message:");
   tft.print(Message);
-  //pinMode(wakePin, INPUT);
 }
 
 void loop() {
-  if (millis() - screenOn > IDLE_TIME) {
-    screenOn = millis();
-    digitalWrite(onOffMechPin, !ON); // turn off screen
-    Serial.println("Sleeping...");
-    delay(100);
-    sleepFunc();
-    Serial.println("Wake up!");
-    digitalWrite(onOffMechPin, ON);
-
-    //follow the setup, but Message is not changed.
-    tft.reset();
-    uint16_t identifier = tft.readID();
-    tft.begin(identifier);
-    tft.fillScreen(BLACK);
-    tft.setRotation(3);
-    //unsigned long start = micros();
-    tft.setCursor(5, 25);
-    tft.setTextColor(WHITE);
-    tft.setTextSize(4);
-    // Write Rescue is on the way
-    tft.println("HELP IS HERE!");
-    pinMode(BUTTON, INPUT);
-    tft.setTextSize(2);
-    normalDisplay();
-    tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
-    tft.setCursor(80, 180);
-    tft.print("Message:");
-    tft.print(Message);
+  if ((millis() % IDLE_TIME) == 0) {
+    gpsGetCoordinates();
+    screenOn = screenOn/IDLE_TIME;
+    callLopy();
+    readLopy();
   }
   optionSelectionUI();
-  if (!gpsDetect() && (newdata == true)) {
-    count++;
-    Serial.print("Missed Transmission Cycle: "); Serial.print(count);
-  }
-
-
 }
 
 void normalDisplay() {
   // We draw 3 circles horizontal in the screen with the icons
   // size R = 51, distance betwen each circle is 10
-  tft.drawRoundRect(2, tft.height() / 2 - 51, 102, 102, 51, BLUE);
+  // 1st circle(shelter)
+  //tft.drawRoundRect(2, tft.height() / 2 - 51, 102, 102, 51, BLUE);
   tft.fillRoundRect(2, tft.height() / 2 - 51, 102, 102, 51, BLUE);
   tft.drawBitmap(3, tft.height() / 2 - 50 , shelter, 100, 100, WHITE);
-  //2nd circle
-  tft.drawRoundRect(100 + 8, tft.height() / 2 - 51, 102, 102, 51, GREEN);
+  //2nd circle(ration)
+  //tft.drawRoundRect(100 + 8, tft.height() / 2 - 51, 102, 102, 51, GREEN);
   tft.fillRoundRect(100 + 8, tft.height() / 2 - 51, 102, 102, 51, GREEN);
-  tft.drawBitmap(100 + 9, tft.height() / 2 - 50 , food, 100, 100, WHITE);
-  //3rd round circle
-  tft.drawRoundRect(200 + 14, tft.height() / 2 - 51, 102, 102, 51, RED);
+  tft.drawBitmap(100 + 9, tft.height() / 2 - 50 , ration, 100, 100, WHITE);
+  //3rd round circle(medical)
+  //tft.drawRoundRect(200 + 14, tft.height() / 2 - 51, 102, 102, 51, RED);
   tft.fillRoundRect(200 + 14, tft.height() / 2 - 51, 102, 102, 51, RED);
   tft.drawBitmap(200 + 15, tft.height() / 2 - 50 , medical, 100, 100, WHITE);
-
 }
 
 void optionSelectionUI() {
+
+  // "pending" code: two way communication
+
+  // left right scrolling
   if (analogRead(BUTTON) > 100) {
-    screenOn = millis(); // reset time to sleep
+    screenOn = millis() - screenOn; // reset time to sleep
     if (analogRead(BUTTON) < 700) {
       tft.setCursor(90, 180);
-      if (Message == "Shelter") {
-        tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, BLACK);
-        tft.drawBitmap(100 + 8, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
-        Message = "Food";
-      } else if (Message == "Food") {
-        tft.drawBitmap(100 + 8, tft.height() / 2 - 52  , transSq, 104, 104, BLACK);
-        tft.drawBitmap(200 + 13, tft.height() / 2 - 52  , transSq, 104, 104, WHITE);
-        Message = "Medical";
-      } else if (Message == "Medical") {
+      if (Message == 0) {
+        deselectShelter();
+        selectRation();
+        Message = 1;
+      } else if (Message == 1) {
+        deselectRation();
+        selectMedical();
+        Message = 2;
+      } else if (Message == 2) {
         //Message = selectLeft();
-        tft.drawBitmap(200 + 13, tft.height() / 2 - 52  , transSq, 104, 104, BLACK);
-        tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
-        Message = "Shelter";
+        deselectMedical();
+        selectShelter();
+        Message = 0;
       }
       tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
     } else if (analogRead(BUTTON) >= 700) {
-      if (Message == "Shelter") {
-        tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, BLACK);
-        tft.drawBitmap(200 + 13, tft.height() / 2 - 52  , transSq, 104, 104, WHITE);
-        Message = "Medical";
-      } else if (Message == "Medical") {
-        tft.drawBitmap(200 + 13, tft.height() / 2 - 52  , transSq, 104, 104, BLACK);
-        tft.drawBitmap(100 + 8, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
-        Message = "Food";
-      } else if (Message == "Food") {
-        tft.drawBitmap(100 + 8, tft.height() / 2 - 52  , transSq, 104, 104, BLACK);
-        tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
-        Message = "Shelter";
+      if (Message == 0) {
+        deselectShelter();
+        selectMedical();
+        Message = 2;
+      } else if (Message == 2) {
+        deselectMedical();
+        selectRation();
+        Message = 1;
+      } else if (Message == 1) {
+        deselectRation();
+        selectShelter();
+        Message = 0;
       }
-      //tft.drawRoundRect(80,180,180,60,0,BLACK);
       tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
     }
-
+    // this part is for debugging purposes
     tft.setCursor(80, 180);
     tft.print("Message:");
     tft.print(Message);
     delay(100);
   }
+  else if (digitalRead(CONFIRM)) {
+    screenOn = millis()-screenOn;
+    c_Message = Message;
+    delay(100);
+    // some code to show it has been confirmed
+  }
 }
 
-bool gpsDetect() {
-  // checks if gps signal is detected every 5 seconds,
-  // if detected, sends signal to loPy
-  // if not detected, skips transmission
-  // Note: best if there's a way to wake loPy up through interrupt pin
-  //       Arduino doesn't have any extra pins, but could reuse button pins
-  //       please note buttons pins one is 5V one is 2.5V, loPy doesn't support 5V
-  //
-  // return false for each missed counts,
-  // detected/not reached transmission cycle will default to true
+void selectShelter(){
+  tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
+}
 
-  if (gpsSerial.available() && (millis() - startTime > TRANSMIT_TIME)) {
+void deselectShelter(){
+  tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, BLACK);
+}
+
+void selectRation(){
+  tft.drawBitmap(108, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
+}
+
+void deselectRation(){
+  tft.drawBitmap(108, tft.height() / 2 - 52 , transSq, 104, 104, BLACK);
+}
+
+void selectMedical(){
+  tft.drawBitmap(213, tft.height() / 2 - 52  , transSq, 104, 104, WHITE);
+}
+
+void deselectMedical(){
+  tft.drawBitmap(213, tft.height() / 2 - 52  , transSq, 104, 104, BLACK);
+}
+
+void gpsGetCoordinates() {
+  // checks if gps signal is detected
+  // if detected, sends signal to lopy
+  // if not detected, skips transmission
+
+  if (gpsSerial.available()) {
     gps.f_get_position(&flat, &flon, &fix_age);
-    startTime = millis();
-    if (fix_age == TinyGPS::GPS_INVALID_AGE) {
-      Serial.println("Critical: location not fixed!");
-      newdata = false;
-    }
-    else if (fix_age > 5000) {
-      Serial.println("Warning: no GPS signal!");
-      newdata = false;
-    }
-    else {
-      Serial.println("GPS detected");
-      newdata = true;
-    }
-    // code to James
-    Serial.print("Latitude:"); Serial.print(flat);
-    Serial.print("Longitude:"); Serial.println(flon);
-    Serial.print("Last Seen:"); Serial.println(fix_age); Serial.println("");
-    return true;
+    gps.get_datetime(&date, &time, &fix_age);
+
+    // Debugging purposes
+    /*Serial.print("Latitude:"); Serial.print(flat);
+      Serial.print("Longitude:"); Serial.println(flon);
+      Serial.print("Last Seen:"); Serial.println(fix_age);*/
   }
   else {
-    newdata = false;
-    //Serial.print("Latitude:"); Serial.print(flat);
-    //Serial.print("Longitude:"); Serial.print(flon);
-    //Serial.print("Last Seen:"); Serial.println(fix_age);
-    return false;
-
+    // If GPS is not available, will not transmit (the code below is a place holder for debugging purposes
+    /*newdata = false;
+      Serial.print("Latitude:"); Serial.print(flat);
+      Serial.print("Longitude:"); Serial.print(flon);
+      Serial.print("Last Seen:"); Serial.println(fix_age);*/
   }
-
 }
 
-void sleepFunc() {
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  sleep_enable();
-  //sleep_bod_disable();
-  pinMode(wakePin, INPUT); // set pin2 to be input pin
-  attachInterrupt(0, interruptSleep, FALLING);
-  sleep_mode();// *requires checking: does it sleep the cpu and bod as well?
-  sleep_disable();
-  detachInterrupt(0);
+void callLopy() {
+  lopy.println(encodeMessage());
 }
 
-void interruptSleep() {
-  //make the code here short!
-  screenOn = millis();
-  digitalWrite(onOffMechPin, !ON);
+void readLopy() {
+  String buffer;
+  while (!lopy.available());
+  while (lopy.available()) {
+    buffer = lopy.readString();
+  }
+  c_Message = parseMessage(buffer, 0).toInt();
+  broadcastMessage = parseMessage(buffer, 1); 
+  requestStatus = parseMessage(buffer,2); // remember to save P I C as strings!
+}
+
+// Here is the parsing of Json messages
+// Format of the string from lopy to Arduino is
+/*
+   "Selection,broadcast"(this is what the arduino sees)
+   "Device ID, dd/mm/yy hh:mm,latitude, longitude, resource
+*/
+
+String encodeMessage() {
+  // "Device ID, dd/mm/yy hh:mm,latitude, longitude, resourceid, screenUp
+  String buffer = String(DEVICE_ID) + "," + String(date) + " " + String(time) + "," + String(flat) + "," + String(flon) + "," + String(c_Message) + "," + String(screenOn);
+  Serial.println(buffer);
+  return buffer;
+}
+
+String parseMessage(String rawMessage, byte index) {
+  // "Selection,broadcast,status"
+  byte commaNum = 0, startNum = 0;
+  String buffer;
+  for (int i = 0; i < index + 1; i++) {
+    commaNum = rawMessage.indexOf(",", startNum);
+    buffer = rawMessage.substring(startNum, commaNum);
+    startNum = commaNum;
+  }
+  return buffer;
 }
