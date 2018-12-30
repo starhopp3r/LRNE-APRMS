@@ -651,6 +651,7 @@ void callLopy() {
 
 void readLopy() {
   String buffer;
+  lopy.listen();
   while (!lopy.available());
   while (lopy.available()) {
     buffer = lopy.readString();
