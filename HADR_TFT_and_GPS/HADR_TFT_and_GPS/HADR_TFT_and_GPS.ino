@@ -626,7 +626,7 @@ void gpsGetCoordinates() {
   // checks if gps signal is detected
   // if detected, sends signal to lopy
   // if not detected, skips transmission
-
+  gpsSerial.listen();
   if (gpsSerial.available()) {
     gps.f_get_position(&flat, &flon, &fix_age);
     gps.get_datetime(&date, &time, &fix_age);
