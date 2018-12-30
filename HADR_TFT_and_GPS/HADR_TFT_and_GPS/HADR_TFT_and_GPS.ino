@@ -28,16 +28,6 @@
 //   LCD_D5   connects to digital pin 5
 //   LCD_D6   connects to digital pin 6
 //   LCD_D7   connects to digital pin 7
-
-//JSON object for SEND and RECEIVE (wrt Arduino)
-
-/*JSON object SEND
-   {
-    "user":"",
-    "latitude":"",
-    "longitude:""
-   }
-*/
 //==========================================================
 
 
@@ -448,6 +438,7 @@ void selectRation(void);
 void deselectRation(void);
 void selectMedical(void);
 void deselectMedical(void);
+// SOme functions to call and read lopy
 void callLopy(unsigned long wakeTime);
 void readLopy(void);
 //==============================================================================================
