@@ -82,6 +82,6 @@ while True:
 
     # NOTE: Only in the testing script
     # If master_ip exists, and ping is successful, spam them with information
-    if not master_ip == "" and mesh.ping(master_ip.decode()) > 0:
+    if not master_ip == "" and mesh.ping(master_ip) > 0:
         print("[Debug] Master IP exists. Sending test data")
         s.sendto("MSG0,16/12/18 11:08,51.174693,-3.061574,11", (master_ip, PORT)) # otherwise, sends the data, omitting the \n character
