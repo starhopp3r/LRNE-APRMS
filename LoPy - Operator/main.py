@@ -6,27 +6,28 @@
 
 
 from network import LoRa, WLAN
+from loramesh import Loramesh
+import gc
 import machine
 import socket
+import pycom
+import utime
 
 # Constants
-WIFI_SSID = "Lim Zone Portable"
-WIFI_PASSWORD = "pyrd7990"
-POST_IP = "192.168.43.116"
+WIFI_SSID = "<wifi ssid here>"
+WIFI_PASSWORD = "<wifi password here>"
+POST_IP = "<dashboard ip here>"
 POST_PORT = 5000
 
-# LoRa init
-lora = LoRa(mode=LoRa.LORA, region=LoRa.AS923)
-s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
+PORT = 1000
 
-# WLAN init
-wlan = WLAN(mode=WLAN.STA)
-networks = wlan.scan()
-for network in networks:
-    if network.ssid == WIFI_SSID:
-        wlan.connect(network.ssid, auth=(network.sec, WIFI_PASSWORD), timeout=5000)
-        while not wlan.isconnected():
-            machine.idle() # system timer will constantly wake the LoPy
+# Function to print changes in strings
+old = ""
+def u_print(new):
+    global old
+    if new != old:
+        print(new)
+        old = new
 
 # TCP Socket init + HTTP post function
 def http_post(addr, port, data):
@@ -43,18 +44,72 @@ def http_post(addr, port, data):
 def strip_headers(data):
     return data.split(b"\r\n")[-1]
 
-# Do work with data
+# LoRa init
+print("[Debug] Initializing LoRa")
+lora = LoRa(mode=LoRa.LORA, region=LoRa.AS923)
+mesh = Loramesh(lora)
+while not mesh.is_connected():
+    u_print("[Debug - LoRa mesh connecting] Current state: %s, Single: %s" % (mesh.cli('state'), mesh.cli('singleton')))
+print("[Debug] Initialized & connected to mesh.")
+
+print("[Debug] Connecting to WiFi")
+# WLAN init
+wlan = WLAN(mode=WLAN.STA)
+networks = wlan.scan()
+for network in networks:
+    if network.ssid == WIFI_SSID:
+        wlan.connect(network.ssid, auth=(network.sec, WIFI_PASSWORD), timeout=5000)
+        while not wlan.isconnected():
+            continue
+print("[Debug] Connected to WiFi.")
+
+print("[Debug] Initializing socket")
+s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
+s.bind(PORT)
+
+# Begin socializing with other neighbors and perform transactions with data
+neighbors = []
+ip = mesh.ip()
 if __name__ == "__main__":
-    buf = b''
+    buf = ""
+
     while True:
-        buf = s.recv(64)
+        # Check if this particular node has changed IP addresses
+        if not ip == mesh.ip():
+            ip = mesh.ip()
+            neighbors = [] # if there was an IP change, inform everybody
 
-        # Verify the buffer
-        if buf.count(b",") != 4:
-            continue # we haven't recieved the full buffer
+        # Check the neighbors list, and submit our IP to them.
+        new_neighbors = mesh.neighbors_ip()
+        diff_neighbors = set(new_neighbors)- set(neighbors)
+        u_print("[Debug] Neighbors not acknowledged: %s" % diff_neighbors)
+        for neighbor in diff_neighbors:
+            if mesh.ping(neighbor) > 0:
+                s.sendto("MASTER%s" % (ip), (neighbor, PORT))
 
-        # Send the buffer
-        ok_message = http_post(POST_IP, POST_PORT, buf)
+        # Remove any dropped nodes
+        neighbors = list(set(neighbors) - (set(neighbors) - set(new_neighbors)))
+        gc.collect() # run garbage collection
 
-        # Transmit the ok message back to the slave(s) NOTE: Hacky hack hack
-        s.send(ok_message)
+        # There are three possible messages: MASTER, MSG and ACK. Beacuse we are the master, ignore MASTER messages
+        buf, recv_addr = s.recvfrom(512)
+        if len(buf) > 0 and buf != "":
+            print("[Debug] Packet recieved from %s: %s" % (recv_addr[0], buf))
+
+            if buf.startswith("MSG"):
+                buf = buf[3:]
+                print("[Debug - Recieved Packet] It was a message: %s" % (buf))
+                # Verify the buffer
+                if buf.count(b",") != 4:
+                    continue # we haven't recieved the full buffer
+
+                # Send the buffer to the server
+                ok_message = http_post(POST_IP, POST_PORT, buf)
+
+                # Transmit the ok message back to the slave
+                if mesh.ping(recv_addr[0]) > 0:
+                    s.sendto("MSG" + ok_message.decode(), recv_addr)
+            elif buf.startswith("ACK"):
+                buf = buf[3:]
+                print("[Debug - Recieved Packet] It was an acknowledgement for neighbor discovery, from: %s" % (buf.decode()))
+                neighbors.append(buf.decode())
