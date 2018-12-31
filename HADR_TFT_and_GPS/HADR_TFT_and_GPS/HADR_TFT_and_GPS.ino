@@ -661,7 +661,6 @@ void readLopy() {
   requestStatus = parseMessage(buffer,2); // remember to save P I C as strings!
 }
 
-// Here is the parsing of Json messages
 // Format of the string from lopy to Arduino is
 /*
    "Selection,broadcast"(this is what the arduino sees)
@@ -682,7 +681,7 @@ String parseMessage(String rawMessage, byte index) {
   for (int i = 0; i < index + 1; i++) {
     commaNum = rawMessage.indexOf(",", startNum);
     buffer = rawMessage.substring(startNum, commaNum);
-    startNum = commaNum;
+    startNum = commaNum+1;
   }
   return buffer;
 }
