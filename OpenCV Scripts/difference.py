@@ -37,8 +37,8 @@ for box in tqdm(bounding_boxes):
 	# Unpack the x, y, w, h values
 	x, y, w, h = tuple(box)
 	# Draw the bounding boxes
-	cv2.rectangle(imageA, (x, y), (x + w, y + h), (255, 255, 255), 3)
-	cv2.rectangle(imageB, (x, y), (x + w, y + h), (255, 255, 255), 3)
+	cv2.rectangle(imageA, (x, y), (x + w, y + h), (0, 0, 255), 6)
+	cv2.rectangle(imageB, (x, y), (x + w, y + h), (0, 0, 255), 6)
 
 # show the output images
 cv2.imwrite("Original.jpg", imageA)
