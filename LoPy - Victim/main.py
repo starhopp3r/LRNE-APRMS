@@ -2,38 +2,143 @@
 # Author: s u d o _
 # Reference: https://docs.pycom.io/tutorials/lora/module-module.html 
 from network import LoRa
-from machine import UART
+from machine import UART, Pin
+from loramesh import Loramesh
 import socket
 import time
+import machine
+import pycom
+import gc
 
-TX_PIN = "G17"
-RX_PIN = "G22"
+TX_PIN = "G22"
+RX_PIN = "G17"
 
+PORT = 1000
+
+# Function to print changes in strings
+old = ""
+def u_print(new):
+    global old
+    if new != old:
+        print(new)
+        old = new
+
+# A blink function.
+def blink(color):
+    pycom.rgbled(color)
+    time.sleep_ms(100)
+    pycom.rgbled(0x000000)
+
+print("[Debug] Initializing LoRa")
 lora = LoRa(mode=LoRa.LORA, region=LoRa.AS923) # Operation of unlicensed Part 15 devices are permitted between 902 and 928 MHz
+mesh = Loramesh(lora)
 uart = UART(1, baudrate=9600, bits=8, parity=None, stop=1, pins=(TX_PIN, RX_PIN))
+while not mesh.is_connected():
+    u_print("[Debug - LoRa mesh connecting] Current state %s, Single: %s" % (mesh.cli('state'), mesh.cli('singleton'))) 
+print("[Debug] Initialized & connected to mesh.")
+
+# Create socket
+print("[Debug] Initializing socket")
 s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
-s.setsockopt(socket.SOL_LORA, socket.SO_DR, 0) # set data rate
-## Info: Value of 0 - 250 bit/s, spreading factor of 12
+s.bind(PORT)
+print("[Debug] Socket initialized")
 
-# Every 30 seconds, attempts to obtain data from the UART
+# Create UART
+print("[Debug] Initializing UART")
+uart = UART(1, baudrate=9600, bits=8, pins=(TX_PIN, RX_PIN))
+previous_data = b"#0,,P#"
+compass_data = ""
+print("[Debug] UART initialized")
+# Turn off heartbeat
+pycom.heartbeat(False)
+
+neighbors = mesh.neighbors_ip() # first neighbor already knows the master
+ip = mesh.ip()
+master_ip = ""
 while True:
-    if uart.any():
-        data = uart.readline()
-        uart.readall() # purge remaining data
-        print(data)
-        if data.count(b',') != 4: # check to ensure that we have 4 parameters
-            continue
-       
-        s.setblocking(False)
-        s.send(data[:-1]) # otherwise, sends the data, omitting the \n character
+    buf = ""
+    # Mesh Networking
+    try:
+        # React to any IP change
+        if not ip == mesh.ip():
+            ip = mesh.ip()
 
-        s.settimeout(5)
-        try:
-            broadcast = s.recv(256) # recieves the broadcast message back
-        except TimeoutError:
-            continue
+        # Check for any incoming messages: MASTER, MSG and ACK
+        buf, recv_addr = s.recvfrom(64)
+        if len(buf) > 0 and buf != "":
+            print("[Debug] Packet recieved from %s: %s" % (recv_addr[0], buf))
 
-        if broadcast[1] != b'#' or broadcast[-1] != b'#': # ensures that the message is ours
-            continue
+            if buf.startswith("MASTER"):
+                blink(0xFF0000)
+                buf = buf[6:]
+                print("[Debug - Recieved Packet] It was a MASTER IP information packet: %s" % (buf))
+                master_ip = buf.decode()
+                s.sendto("ACK" + ip, recv_addr)
+                time.sleep(10)
+            elif buf.startswith("MSG"):
+                blink(0x00FF00)
+                buf = buf[3:]
+                print("[Debug - Recieved Packet] It was a message: %s" % (buf))
+            elif buf.startswith("ACK"):
+                blink(0x0000FF)
+                buf = buf[3:]
+                print("[Debug - Recieved Packet] It was an acknowledgement for neighbor discovery, from: %s" % (buf.decode()))
+                neighbors.append(buf.decode())
 
-        print(broadcast)
+        # Check the neighbors list, and submit the master IP to them, if we have the master IP.
+        new_neighbors = mesh.neighbors_ip()
+        if not master_ip == "":
+            diff_neighbors = set(new_neighbors) - set(neighbors)
+            u_print("[Debug] Neighbors not acknowledged: %s" % diff_neighbors)
+            for neighbor in diff_neighbors:
+                if not neighbor == master_ip:
+                    s.sendto("MASTER%s" % (ip), (neighbor, PORT))
+                    time.sleep(5)
+
+        # Remove any dropped nodes
+        neighbors = list(set(neighbors) - (set(neighbors) - set(new_neighbors)))
+
+        # If master_ip exists, and ping is successful, spam them with information
+        if not master_ip == "" and not compass_data == "":
+            print("[Debug] Master IP exists. Sending compass data")
+            blink(0xFFFFFF)
+            s.sendto("MSG%s" % compass_data, (master_ip, PORT)) # otherwise, sends the data, omitting the \n character
+            time.sleep(10)
+
+    except OSError as e:
+        print("[Error] An error ocurred while attempting something. Exact error (no. %d): %s" % (e.errno, e))
+        if e.errno == "106":
+            print("[Error] The error has been documented in issue #15. Neighbors: %s" % (neighbors))
+
+        if e.errno == 12:
+            print("[Error] The error has been documented in issue #15. Triggering garbage collector and sleeping for 6 seconds. Current Mem: %s" % (gc.mem_free()))
+            gc.collect()
+            time.sleep(6)
+
+    # Serial
+    data = uart.read()
+
+    if data == None:
+        continue
+    elif data.find(b"OK") >= 0: # ready message, respond with previous data
+        print("[Debug] OK Message from Arduino")
+        uart.write(previous_data)
+    elif data[0] == 35 and data[-1] == 35 and data.count(b",") == 5: # normal operation
+        exploded_data = data[1:-1].decode().split(',')
+        if exploded_data[-1] == '1':
+            print("[Not implemented] Turn off the screen now") # TODO: Turn off screen
+
+        compass_data = ",".join(exploded_data[:-1])
+        print("[Debug] Compass data: %s" % (compass_data)) 
+
+        if not buf == b"": 
+            exploded_response = buf[1:-1].decode().split('\n')
+            if not compass_data == "":
+                try:
+                    previous_data = "#%s,%s,%s#" % (compass_data.split(',')[-1], exploded_response[0], exploded_response[1])
+                except: pass
+
+        print("[Debug] Sending stored data to Arduino: %s" % previous_data)
+        uart.write(previous_data)
+
+    print("[Debug] Serial message was: %s" % (data))
