@@ -59,9 +59,15 @@ $(document).ready(function(e) {
 		juxtapose.scanPage();
 	});
 
-	$('#cvAnalysis').click(function() {
+	$('#regionBefore').click(function() {
 		// Show computer vision analysis
-		slider.rightImage.children[0].src = serveLoc + "/static/img/diff.jpg";
+		slider.rightImage.children[0].src = serveLoc + "/static/img/2013bb.jpg";
+		juxtapose.scanPage();
+	});
+
+	$('#regionAfter').click(function() {
+		// Show computer vision analysis
+		slider.rightImage.children[0].src = serveLoc + "/static/img/2014bb.jpg";
 		juxtapose.scanPage();
 	});
 });

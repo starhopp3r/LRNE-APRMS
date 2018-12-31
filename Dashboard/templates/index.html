@@ -78,17 +78,21 @@
 			</div>
 			<!-- Dropdown list to select different maps -->
 			<div class="dropdown">
-			  <button onclick="mapOptions(event)" class="dropbtn">MAP OPTIONS</button>
-			  <div id="myDropdown" class="dropdown-content">
-			    <p id="satImg">SATELLITE IMAGERY</p>
-			    <p id="cvAnalysis">TERRAIN ANALYSIS</p>
-			  </div>
+				<button onclick="mapOptions(event)" class="dropbtn">MAP OPTIONS</button>
+				<div id="myDropdown" class="dropdown-content">
+					<p id="satImg">SATELLITE IMAGERY</p>
+					<p id="regionBefore">CHANGED REGIONS (BEFORE)</p>
+					<p id="regionAfter">CHANGED REGIONS (AFTER)</p>
+				</div>
 			</div>
 			<!-- Multiple map options with slider -->
-			<div id="sat-img" class="juxtapose" data-startingposition="50%">
-				<img src="{{ url_for('static', filename='img/2013.jpg') }}" data-label="BEFORE FLOOD"/>
-				<img src="{{ url_for('static', filename='img/2014.jpg') }}" data-label="AFTER FLOOD"/>
-			</div>
+			<div class="map-container">
+				<div class="loader"></div>
+				<div id="sat-img" class="juxtapose" data-startingposition="50%">
+					<img src="{{ url_for('static', filename='img/2013.jpg') }}" data-label="BEFORE FLOOD"/>
+					<img src="{{ url_for('static', filename='img/2014.jpg') }}" data-label="AFTER FLOOD"/>
+				</div>
+			<div>
 			<!-- JuxtaposeJS -->
 			<script src="{{ url_for('static', filename='js/juxtapose.js') }}"></script>
 			<link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">
