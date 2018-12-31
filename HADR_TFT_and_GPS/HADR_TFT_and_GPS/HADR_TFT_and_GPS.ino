@@ -430,7 +430,7 @@ void normalDisplay(void);
 void optionSelectionUI(void);
 void gpsGetCoordinates(void);
 String encodeMessage(String);
-String parseMessage(String,byte);
+String parseMessage(String, byte);
 // Some functions for optionSelectUI
 void selectShelter(void);
 void deselectShelter(void);
@@ -438,7 +438,6 @@ void selectRation(void);
 void deselectRation(void);
 void selectMedical(void);
 void deselectMedical(void);
-// SOme functions to call and read lopy
 void callLopy(unsigned long wakeTime);
 void readLopy(void);
 //==============================================================================================
@@ -459,9 +458,11 @@ TinyGPS gps;
 String msgStatus = "0";
 float flat = 0;
 float flon = 0;
-unsigned long fix_age = 1, time, date; // returns +- latitude/longitude in degrees
+unsigned long fix_age = 1, time = 1, date = 1; // returns +- latitude/longitude in degrees
 unsigned long screenOn = millis();
-byte screenUp = 0;
+String temp;
+char hi;
+//byte screenUp = 0;
 
 //==============================================================================================
 
@@ -469,7 +470,7 @@ void setup() {
 
   Serial.begin(9600);
   Serial.println("SudoX rescue handset ready!");
-  gpsSerial.begin(9600);
+  //gpsSerial.begin(9600);
   lopy.begin(9600);
 
   //gpsSerial.print("!UBX CFG-GPS0 1"); // send to low power mode
@@ -493,17 +494,23 @@ void setup() {
   // first edits done on 30/12/2018
   lopy.write("OK");
   lopy.listen();
-  while (!lopy.available());
-  while (lopy.available()) {
-    Message = parseMessage(lopy.readString(),0).toInt();
+  //while (!lopy.available());
+  delay(100);
+  while (((hi = lopy.read()) == '#'));
+  while ((hi = lopy.read()) != '#') {
+    temp += hi;
+    Serial.println(hi);
   }
+
+  Message = parseMessage(temp, 0).toInt();
+  Serial.println(Message);
 
   pinMode(BUTTON, INPUT); // reading different voltage levels as left and right
   pinMode(CONFIRM, INPUT); // sending this message to lopy
   tft.setTextSize(2);
 
 
-   if (Message == 0) {
+  if (Message == 0) {
     selectShelter();
   }
   else if (Message == 1) {
@@ -520,7 +527,7 @@ void setup() {
 void loop() {
   if ((millis() % IDLE_TIME) == 0) {
     gpsGetCoordinates();
-    screenOn = screenOn/IDLE_TIME;
+    screenOn = (millis() - screenOn) / IDLE_TIME;
     callLopy();
     readLopy();
   }
@@ -550,7 +557,7 @@ void optionSelectionUI() {
 
   // left right scrolling
   if (analogRead(BUTTON) > 100) {
-    screenOn = millis() - screenOn; // reset time to sleep
+    screenOn = millis(); // reset time to sleep
     if (analogRead(BUTTON) < 700) {
       tft.setCursor(90, 180);
       if (Message == 0) {
@@ -584,41 +591,41 @@ void optionSelectionUI() {
       }
       tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
     }
-    // this part is for debugging purposes
-    tft.setCursor(80, 180);
-    tft.print("Message:");
-    tft.print(Message);
-    delay(100);
   }
   else if (digitalRead(CONFIRM)) {
-    screenOn = millis()-screenOn;
+    screenOn = millis(); // reset sleep time
     c_Message = Message;
-    delay(100);
+    //delay(100);
     // some code to show it has been confirmed
   }
+  // this part is for debugging purposes
+  tft.setCursor(80, 180);
+  tft.print("Message:");
+  tft.print(Message);
+  //delay(100);
 }
 
-void selectShelter(){
+void selectShelter() {
   tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
 }
 
-void deselectShelter(){
+void deselectShelter() {
   tft.drawBitmap(2, tft.height() / 2 - 52 , transSq, 104, 104, BLACK);
 }
 
-void selectRation(){
+void selectRation() {
   tft.drawBitmap(108, tft.height() / 2 - 52 , transSq, 104, 104, WHITE);
 }
 
-void deselectRation(){
+void deselectRation() {
   tft.drawBitmap(108, tft.height() / 2 - 52 , transSq, 104, 104, BLACK);
 }
 
-void selectMedical(){
+void selectMedical() {
   tft.drawBitmap(213, tft.height() / 2 - 52  , transSq, 104, 104, WHITE);
 }
 
-void deselectMedical(){
+void deselectMedical() {
   tft.drawBitmap(213, tft.height() / 2 - 52  , transSq, 104, 104, BLACK);
 }
 
@@ -646,30 +653,37 @@ void gpsGetCoordinates() {
 }
 
 void callLopy() {
-  lopy.println(encodeMessage());
+  lopy.print(encodeMessage());
 }
 
 void readLopy() {
   String buffer;
   lopy.listen();
-  while (!lopy.available());
-  while (lopy.available()) {
-    buffer = lopy.readString();
+  while (!((hi = lopy.read()) == '#'));
+  //temp+=hi;
+  //delay(50);
+  while ((hi = lopy.read()) != '#') {
+    temp += hi;
+    Serial.print("LoPy:"); Serial.println(hi);
+    //delay(50);
   }
+  buffer = temp;
   c_Message = parseMessage(buffer, 0).toInt();
-  broadcastMessage = parseMessage(buffer, 1); 
-  requestStatus = parseMessage(buffer,2); // remember to save P I C as strings!
+  broadcastMessage = parseMessage(buffer, 1);
+  requestStatus = parseMessage(buffer, 2); // remember to save P I C as strings!
+  Serial.print(c_Message); Serial.print(", "); Serial.print(broadcastMessage); Serial.print(", "); Serial.println(requestStatus);
+  delay(100);
 }
 
 // Format of the string from lopy to Arduino is
 /*
-   "Selection,broadcast"(this is what the arduino sees)
-   "Device ID, dd/mm/yy hh:mm,latitude, longitude, resource
+   "Selection,broadcast,status"(this is what the arduino sees)
+   "Device ID, dd/mm/yy hh:mm,latitude, longitude, resource, screenOn
 */
 
 String encodeMessage() {
   // "Device ID, dd/mm/yy hh:mm,latitude, longitude, resourceid, screenUp
-  String buffer = String(DEVICE_ID) + "," + String(date) + " " + String(time) + "," + String(flat) + "," + String(flon) + "," + String(c_Message) + "," + String(screenOn);
+  String buffer = "#" + String(DEVICE_ID) + "," + String(date) + " " + String(time) + "," + String(flat) + "," + String(flon) + "," + String(c_Message) + "," + String(screenOn) + "#";
   Serial.println(buffer);
   return buffer;
 }
@@ -678,10 +692,20 @@ String parseMessage(String rawMessage, byte index) {
   // "Selection,broadcast,status"
   byte commaNum = 0, startNum = 0;
   String buffer;
-  for (int i = 0; i < index + 1; i++) {
-    commaNum = rawMessage.indexOf(",", startNum);
-    buffer = rawMessage.substring(startNum, commaNum);
-    startNum = commaNum+1;
+  if ( index != 2) {
+    for (int i = 0; i < index + 1; i++) {
+      commaNum = rawMessage.indexOf(",", startNum);
+      buffer = rawMessage.substring(startNum, commaNum);
+      startNum = commaNum + 1;
+    }
+  }
+  else {
+    for (int i = 0; i < 2; i++) {
+      commaNum = rawMessage.indexOf(",", startNum);
+      buffer = rawMessage.substring(startNum, commaNum);
+      startNum = commaNum + 1;
+    }
+    buffer = rawMessage.charAt(startNum);
   }
   return buffer;
 }
