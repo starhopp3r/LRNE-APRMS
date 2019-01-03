@@ -10,8 +10,10 @@ import machine
 import pycom
 import gc
 
-TX_PIN = "G22"
-RX_PIN = "G17"
+#TX_PIN = "G22"
+#RX_PIN = "G17"
+TX_PIN = "P3"
+RX_PIN = "P4"
 
 ARDUINO_POWER = "P8"
 BUTTON_OF_POWER = "P9" # 10/10 naming scheme
@@ -42,7 +44,6 @@ print("[Debug] Initializing LoRa")
 machine.disable_irq() # critical section
 lora = LoRa(mode=LoRa.LORA, region=LoRa.AS923) # Operation of unlicensed Part 15 devices are permitted between 902 and 928 MHz
 mesh = Loramesh(lora)
-uart = UART(1, baudrate=9600, bits=8, parity=None, stop=1, pins=(TX_PIN, RX_PIN))
 while not mesh.is_connected():
     u_print("[Debug - LoRa mesh connecting] Current state %s, Single: %s" % (mesh.cli('state'), mesh.cli('singleton'))) 
 print("[Debug] Initialized & connected to mesh.")
@@ -55,7 +56,7 @@ print("[Debug] Socket initialized")
 
 # Create UART
 print("[Debug] Initializing UART")
-uart = UART(1, baudrate=9600, bits=8, pins=(TX_PIN, RX_PIN))
+uart = UART(1, baudrate=9600, bits=8, timeout_chars=255, pins=(TX_PIN, RX_PIN))
 previous_data = b"#0,,P#"
 compass_data = ""
 print("[Debug] UART initialized")
