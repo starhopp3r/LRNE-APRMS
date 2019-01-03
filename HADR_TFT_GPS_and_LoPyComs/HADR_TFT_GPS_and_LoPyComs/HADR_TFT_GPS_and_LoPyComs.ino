@@ -9,9 +9,7 @@
 //========================================================
 // Reference for  SudoX
 //========================================================
-// wiring with ATMega328P-PU:
-//--------------POWER Pins--------------------------------
-//   5V  connects to DC 5V
+// wiring with ATMega328P-PU: //--------------POWER Pins-------------------------------- //   5V  connects to DC 5V
 //   GND connects to Ground
 //--------------LCD Display Pins--------------------------
 //   LCD_RD     connects to Analog pin A0
@@ -440,13 +438,14 @@ MCUFRIEND_kbv tft;
 byte Message = 11, c_Message = 11;
 String broadcastMessage = "", requestStatus = "";
 SoftwareSerial gpsSerial (13, 12); //13 to GPS TX, 12 tp GPS RX
+SoftwareSerial nani (10, 11);
 TinyGPS gps;
 String msgStatus = "0";
 float flat = 0;
 float flon = 0;
 unsigned long fix_age = 1, time = 1, date = 1; // returns +- latitude/longitude in degrees
 unsigned long screenOn = millis();
-String temp;
+char* temp;
 char c;
 int i = 0;
 //==============================================================================================
@@ -458,29 +457,27 @@ void setup() {
   uint16_t identifier = tft.readID();
   tft.begin(identifier);
   tft.fillScreen(BLACK);
-  tft.setRotation(3);
+  tft.setRotation(1);
   tft.setCursor(5, 25);
   tft.setTextColor(WHITE);
   tft.setTextSize(4);
   // Write HELP IS HERE!
   tft.println("HELP IS HERE!");
   normalDisplay();
+  temp = new char[64];
 
   //Listening to LoPy, code here must change!
   // first edits done on 30/12/2018
   // second edits done on 31/12/2018 ==> changed software serial lopy to hardware serial
   Serial.write("OK");
-   while (((c = Serial.read()) != '#')&&(i < 500))i++;
-   i = 0;
-  while (((c = Serial.read()) != '#')&& i < 500) {
-    temp += c;
-    i++;
-  }
-  i = 0;
+  while (((c = Serial.read()) != '#'));
+  temp[Serial.readBytesUntil('#', temp, 64)] = '\0';
+  
   Message = parseMessage(temp, 0).toInt();
-
+  delete temp;
+  
   pinMode(BUTTON, INPUT); // reading different voltage levels as left and right
-  pinMode(CONFIRM, INPUT); // sending this message to lopy
+  pinMode(CONFIRM, INPUT); // sending this message to lopy NOTE: Comment this out if needed to be used as debug serial monitor
   tft.setTextSize(2);
 
 
@@ -498,12 +495,18 @@ void setup() {
   tft.print(Message);
 }
 
+// xiao mod
+unsigned long long last_time = millis();
+
 void loop() {
-  if ((millis() % 5000) == 0) {
+  if (millis() - last_time >= 15000) {
     gpsGetCoordinates();
     screenOn = (millis() - screenOn) / IDLE_TIME;
+    nani.print("doing thing to lopy");
     callLopy();
+    nani.print("finish liao");
     readLopy();
+    last_time = millis();
   }
   optionSelectionUI();
 }
@@ -528,9 +531,9 @@ void normalDisplay() {
 void optionSelectionUI() {
 
   // left right scrolling
-  if (analogRead(BUTTON) > 100) {
+  if (analogRead(BUTTON) < 1000) {
     screenOn = millis(); // reset time to sleep
-    if (analogRead(BUTTON) < 700) {
+    if (analogRead(BUTTON) < 350) {
       tft.setCursor(90, 180);
       if (Message == 0) {
         deselectShelter();
@@ -563,8 +566,7 @@ void optionSelectionUI() {
       }
       tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
     }
-  }
-  else if (digitalRead(CONFIRM)) {
+  } else if (digitalRead(CONFIRM)) {
     screenOn = millis(); // reset sleep time
     tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
     c_Message = Message;
@@ -617,18 +619,21 @@ void callLopy() {
 }
 
 void readLopy() {
-  String buffer;
-  while (((c = Serial.read()) != '#')&& i <500)i++;
-  i = 0;
-  while (((c = Serial.read()) != '#')&& i <500) {
-    temp += c;
-    i++;
+  temp = new char[64];
+  while ((c = Serial.read()) != '#' && i++ < 100) {
+    nani.print(c);
+    delay(10);
   }
+  
+  if (i <= 100) {
+    temp[Serial.readBytesUntil('#', temp, 64)] = '\0';
+    c_Message = parseMessage(temp, 0).toInt();
+    broadcastMessage = parseMessage(temp, 1);
+    requestStatus = parseMessage(temp, 2); // remember to save P I C as strings!
+  }
+
   i = 0;
-  buffer = temp;
-  c_Message = parseMessage(buffer, 0).toInt();
-  broadcastMessage = parseMessage(buffer, 1);
-  requestStatus = parseMessage(buffer, 2); // remember to save P I C as strings!
+  delete temp;
   delay(100);
 }
 
@@ -665,4 +670,3 @@ String parseMessage(String rawMessage, byte index) {
   }
   return buffer;
 }
-
