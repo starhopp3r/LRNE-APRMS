@@ -13,6 +13,9 @@ import gc
 TX_PIN = "G22"
 RX_PIN = "G17"
 
+ARDUINO_POWER = "P8"
+BUTTON_OF_POWER = "P9" # 10/10 naming scheme
+
 PORT = 1000
 
 # Function to print changes in strings
@@ -29,7 +32,14 @@ def blink(color):
     time.sleep_ms(100)
     pycom.rgbled(0x000000)
 
+print("[Debug] Initializing pins & interrupts")
+arduino_power = Pin(ARDUINO_POWER, mode=Pin.OUT, pull=None)
+button = Pin(BUTTON_OF_POWER, mode=Pin.IN, pull=Pin.PULL_UP)
+button.callback(Pin.IRQ_FALLING, handler=lambda pin_obj: arduino_power.toggle())
+print("[Debug] Pin initialization and interrupts set")
+
 print("[Debug] Initializing LoRa")
+machine.disable_irq() # critical section
 lora = LoRa(mode=LoRa.LORA, region=LoRa.AS923) # Operation of unlicensed Part 15 devices are permitted between 902 and 928 MHz
 mesh = Loramesh(lora)
 uart = UART(1, baudrate=9600, bits=8, parity=None, stop=1, pins=(TX_PIN, RX_PIN))
@@ -64,7 +74,9 @@ while True:
             ip = mesh.ip()
 
         # Check for any incoming messages: MASTER, MSG and ACK
+        machine.disable_irq() # enter networking
         buf, recv_addr = s.recvfrom(64)
+        machine.enable_irq()  # exit networking
         if len(buf) > 0 and buf != "":
             print("[Debug] Packet recieved from %s: %s" % (recv_addr[0], buf))
 
@@ -73,7 +85,9 @@ while True:
                 buf = buf[6:]
                 print("[Debug - Recieved Packet] It was a MASTER IP information packet: %s" % (buf))
                 master_ip = buf.decode()
+                machine.disable_irq() # enter networking
                 s.sendto("ACK" + ip, recv_addr)
+                machine.enable_irq() # exit networking
                 time.sleep(10)
             elif buf.startswith("MSG"):
                 blink(0x00FF00)
@@ -92,7 +106,9 @@ while True:
             u_print("[Debug] Neighbors not acknowledged: %s" % diff_neighbors)
             for neighbor in diff_neighbors:
                 if not neighbor == master_ip:
+                    machine.disable_irq() # enter networking
                     s.sendto("MASTER%s" % (ip), (neighbor, PORT))
+                    machine.enable_irq() # exit networking
                     time.sleep(5)
 
         # Remove any dropped nodes
@@ -102,7 +118,9 @@ while True:
         if not master_ip == "" and not compass_data == "":
             print("[Debug] Master IP exists. Sending compass data")
             blink(0xFFFFFF)
+            machine.disable_irq() # enter networking
             s.sendto("MSG%s" % compass_data, (master_ip, PORT)) # otherwise, sends the data, omitting the \n character
+            machine.enable_irq() # exit networking
             time.sleep(10)
 
     except OSError as e:
@@ -116,13 +134,17 @@ while True:
             time.sleep(6)
 
     # Serial
+    machine.disable_irq() # enter serial read
     data = uart.read()
+    machine.enable_irq() # exit serial read
 
     if data == None:
         continue
     elif data.find(b"OK") >= 0: # ready message, respond with previous data
         print("[Debug] OK Message from Arduino")
+        machine.disable_irq() # enter serial write
         uart.write(previous_data)
+        machine.enable_irq() # exit serial write
     elif data[0] == 35 and data[-1] == 35 and data.count(b",") == 5: # normal operation
         exploded_data = data[1:-1].decode().split(',')
         if exploded_data[-1] == '1':
@@ -139,6 +161,8 @@ while True:
                 except: pass
 
         print("[Debug] Sending stored data to Arduino: %s" % previous_data)
+        machine.disable_irq() # enter serial write
         uart.write(previous_data)
+        machine.enable_irq() # enter serial read
 
     print("[Debug] Serial message was: %s" % (data))
