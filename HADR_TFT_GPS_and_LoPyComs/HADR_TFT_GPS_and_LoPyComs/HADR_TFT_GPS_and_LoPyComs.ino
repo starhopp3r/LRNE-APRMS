@@ -438,7 +438,6 @@ MCUFRIEND_kbv tft;
 byte Message = 11, c_Message = 11;
 String broadcastMessage = "", requestStatus = "";
 SoftwareSerial gpsSerial (13, 12); //13 to GPS TX, 12 tp GPS RX
-SoftwareSerial nani (10, 11);
 TinyGPS gps;
 String msgStatus = "0";
 float flat = 0;
@@ -477,7 +476,7 @@ void setup() {
   delete temp;
   
   pinMode(BUTTON, INPUT); // reading different voltage levels as left and right
-  pinMode(CONFIRM, INPUT); // sending this message to lopy NOTE: Comment this out if needed to be used as debug serial monitor
+  pinMode(CONFIRM, INPUT); // sending this message to lopy
   tft.setTextSize(2);
 
 
@@ -502,9 +501,7 @@ void loop() {
   if (millis() - last_time >= 15000) {
     gpsGetCoordinates();
     screenOn = (millis() - screenOn) / IDLE_TIME;
-    nani.print("doing thing to lopy");
     callLopy();
-    nani.print("finish liao");
     readLopy();
     last_time = millis();
   }
@@ -620,10 +617,7 @@ void callLopy() {
 
 void readLopy() {
   temp = new char[64];
-  while ((c = Serial.read()) != '#' && i++ < 100) {
-    nani.print(c);
-    delay(10);
-  }
+  while ((c = Serial.read()) != '#' && i++ < 100) delay(10);
   
   if (i <= 100) {
     temp[Serial.readBytesUntil('#', temp, 64)] = '\0';
