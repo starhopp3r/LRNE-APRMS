@@ -60,16 +60,6 @@ previous_data = b"#0,,P#"
 compass_data = ""
 print("[Debug] UART initialized")
 
-# Set interrupt
-print("[Debug] Setting interrupt")
-def button_callback(pin_obj):
-    arduino_power.toggle()
-    button.callback(Pin.IRQ_FALLING) # remove callback
-    time.sleep_ms(500)
-    button.callback(Pin.IRQ_FALLING, handler=button_callback)
-button.callback(Pin.IRQ_FALLING, handler=button_callback)
-print("[Debug] Interrupt set")
-
 # Turn off heartbeat
 pycom.heartbeat(False)
 # Turn on the Arduino
@@ -78,6 +68,7 @@ arduino_power(0)
 neighbors = mesh.neighbors_ip() # first neighbor already knows the master
 ip = mesh.ip()
 master_ip = ""
+released = True # power button press detection
 while True:
     buf = ""
     # Mesh Networking
@@ -142,7 +133,7 @@ while True:
     data = uart.read()
 
     if data == None:
-        continue
+        pass
     elif data.find(b"OK") >= 0: # ready message, respond with previous data
         print("[Debug] OK Message from Arduino")
         uart.write(previous_data)
@@ -164,5 +155,13 @@ while True:
 
         print("[Debug] Sending stored data to Arduino: %s" % previous_data)
         uart.write(previous_data)
+    else:
+        print("[Debug] Undecipherable serial message was: %s" % (data))
 
-    print("[Debug] Serial message was: %s" % (data))
+    # Button handling
+    ## NOTE: Originally intended to use interrupts, but debouncing was a major issue, so we turned to use this instead.
+    if button() == 0 and released:
+        print("[Debug] Button is down")
+        arduino_power.toggle()
+        released = False
+    else: released = True
