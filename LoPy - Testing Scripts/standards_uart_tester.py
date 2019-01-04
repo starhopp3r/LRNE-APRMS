@@ -2,7 +2,7 @@
 # Author: s u d o_
 
 from machine import UART, Pin
-uart = UART(1, baudrate=9600, bits=8, pins=("G22", "G17"))
+uart = UART(1, baudrate=9600, bits=8, pins=("P3", "P4"))
 
 previous_data = b"#0,Test Broadcast,P#"
 

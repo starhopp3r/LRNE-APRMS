@@ -11,7 +11,7 @@ import machine
 
 from loramesh import Loramesh
 
-lora = LoRa(mode=LoRa.LORA, region=LoRa.AS923)
+lora = LoRa(mode=LoRa.LORA, region=LoRa.US915, frequency=902000001)
 MAC = str(ubinascii.hexlify(lora.mac()))[2:-1]
 
 mesh = Loramesh(lora)
@@ -56,28 +56,26 @@ while True:
                 s.sendto('ACK ' + MAC + ' ' + str(rcv_data)[2:-1], (rcv_ip, rcv_port))
             except Exception:
                 pass
-        mesh.blink(7, .3)
         continue
 
-neighbours = mesh.neighbors_ip()
-print("%d Neighbours %s" % (len(neighbours), neighbours))
+    neighbours = mesh.neighbors_ip()
+    print("%d Neighbours %s" % (len(neighbours), neighbours))
 
-for neighbour in neighbours:
-    if mesh.ping(neighbour) > 0:
-        print("Ping OK from neighbour %s" % neighbour)
-        mesh.blink(10, .1)
-    else:
-        print("Ping not recieved from neighbour %s" % neighbour)
-
-    time.sleep(10)
-
-    pack_num = pack_num + 1
-    try:
-        s.sendto(msg + str(pack_num), (neighbour, myport))
-        print('Sent message to %s' % (neighbour))
-    except Exception:
-        pass
-
-    time.sleep(20 + machine.rng() % 20)
-
-time.sleep(30 + machine.rng() % 30)
+    for neighbour in neighbours:
+        if mesh.ping(neighbour) > 0:
+            print("Ping OK from neighbour %s" % neighbour)
+        else:
+            print("Ping not recieved from neighbour %s" % neighbour)
+    
+        time.sleep(10)
+    
+        pack_num = pack_num + 1
+        try:
+            s.sendto(msg + str(pack_num), (neighbour, myport))
+            print('Sent message to %s' % (neighbour))
+        except Exception:
+            pass
+    
+#        time.sleep(20 + machine.rng() % 20)
+#    
+#    time.sleep(30 + machine.rng() % 30)
