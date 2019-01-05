@@ -440,8 +440,8 @@ String broadcastMessage = "", requestStatus = "";
 SoftwareSerial gpsSerial (13, 12); //13 to GPS TX, 12 tp GPS RX
 TinyGPS gps;
 String msgStatus = "0";
-float flat = 0;
-float flon = 0;
+float flat = 1.3099;
+float flon = 103.7775;
 unsigned long fix_age = 1, time = 1, date = 1; // returns +- latitude/longitude in degrees
 unsigned long screenOn = millis();
 char* temp;
@@ -525,43 +525,53 @@ void normalDisplay() {
   tft.drawBitmap(200 + 15, tft.height() / 2 - 50 , medical, 100, 100, WHITE);
 }
 
+int signal_quality = 0;
+#define MIN_QUALITY 4
 void optionSelectionUI() {
 
   // left right scrolling
   if (analogRead(BUTTON) < 1000) {
     screenOn = millis(); // reset time to sleep
-    if (analogRead(BUTTON) < 350) {
-      tft.setCursor(90, 180);
-      if (Message == 0) {
-        deselectShelter();
-        selectRation(WHITE);
-        Message = 1;
-      } else if (Message == 1) {
-        deselectRation();
-        selectMedical(WHITE);
-        Message = 2;
-      } else if (Message == 2) {
-        //Message = selectLeft();
-        deselectMedical();
-        selectShelter(WHITE);
-        Message = 0;
+    if (analogRead(BUTTON) > 500) {
+      if (signal_quality > 0) signal_quality = 0;
+      if (--signal_quality <= -MIN_QUALITY) {
+        tft.setCursor(90, 180);
+        if (Message == 0) {
+          deselectShelter();
+          selectRation(WHITE);
+          Message = 1;
+        } else if (Message == 1) {
+          deselectRation();
+          selectMedical(WHITE);
+          Message = 2;
+        } else if (Message == 2) {
+          //Message = selectLeft();
+          deselectMedical();
+          selectShelter(WHITE);
+          Message = 0;
+        }
+        tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
+        signal_quality = 0;
       }
-      tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
-    } else if (analogRead(BUTTON) >= 700) {
-      if (Message == 0) {
-        deselectShelter();
-        selectMedical(WHITE);
-        Message = 2;
-      } else if (Message == 2) {
-        deselectMedical();
-        selectRation(WHITE);
-        Message = 1;
-      } else if (Message == 1) {
-        deselectRation();
-        selectShelter(WHITE);
-        Message = 0;
+    } else if (analogRead(BUTTON) <= 500) {
+      if (signal_quality < 0) signal_quality = 0;
+      if (++signal_quality >= MIN_QUALITY) {
+        if (Message == 0) {
+          deselectShelter();
+          selectMedical(WHITE);
+          Message = 2;
+        } else if (Message == 2) {
+          deselectMedical();
+          selectRation(WHITE);
+          Message = 1;
+        } else if (Message == 1) {
+          deselectRation();
+          selectShelter(WHITE);
+          Message = 0;
+        }
+        tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
+        signal_quality = 0;
       }
-      tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
     }
   } else if (digitalRead(CONFIRM)) {
     screenOn = millis(); // reset sleep time
@@ -570,6 +580,7 @@ void optionSelectionUI() {
     //delay(100);
     // some code to show it has been confirmed
   }
+
   // this part is for debugging purposes
   tft.setCursor(80, 180);
   tft.print("Message:");
@@ -639,8 +650,23 @@ void readLopy() {
 
 String encodeMessage() {
   // "Device ID, dd/mm/yy hh:mm,latitude, longitude, resourceid, screenUp
-  String buffer = "#" + String(DEVICE_ID) + "," + String(date) + " " + String(time) + "," + String(flat) + "," + String(flon) + "," + String(c_Message) + "," + String(screenOn) + "#";
+  String buffer = "#" + String(DEVICE_ID) + "," + encodeDate() + " " + String(encodeTime()) + "," + String(flat) + "," + String(flon) + "," + String(c_Message) + "," + String(screenOn) + "#";
   return buffer;
+}
+
+String encodeDate() {
+  int day = date / 10000;
+  int month = (date/ 100) - day * 100;
+  int year = date - month * 100 - day * 10000;
+
+  return ((day > 9) ? (String(day)) : (String('0') + day)) + "/" + ((month > 9) ? (String(month)) : (String('0') + month)) + "/" + ((year > 9) ? (String(year)) : (String('0') + year));
+}
+
+String encodeTime() {
+  int hour = time / 1000000;
+  int minute = (time / 10000) % 100;
+
+  return ((hour > 9) ? (String(hour)) : (String('0') + hour)) + ":" + ((minute > 9) ? (String(minute)) : (String('0') + minute));
 }
 
 String parseMessage(String rawMessage, byte index) {
