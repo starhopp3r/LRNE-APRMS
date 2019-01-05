@@ -573,7 +573,7 @@ void optionSelectionUI() {
         signal_quality = 0;
       }
     }
-  } else if (digitalRead(CONFIRM)) {
+  } else if (!digitalRead(CONFIRM)) {
     screenOn = millis(); // reset sleep time
     tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
     c_Message = Message;
