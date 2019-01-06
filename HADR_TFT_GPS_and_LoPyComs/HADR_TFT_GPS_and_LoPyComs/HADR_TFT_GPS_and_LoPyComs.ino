@@ -382,12 +382,8 @@ void setup() {
   // handle request
   if (requestStatus == "P") clear_status();
   else if (requestStatus == "I") draw_ellipsis();
-  else {
-    draw_double_tick();
-    requestStatus = "P"; //reset to pending
-  }
+  else draw_double_tick();
 
-  // handle broadcast message
   draw_broadcast();
   
   delete temp;
@@ -406,9 +402,6 @@ void setup() {
   else if (Message == 2) {
     selectMedical(WHITE);
   }
-//  tft.setCursor(80, 180);
-//  tft.print("Message:");
-//  tft.print(Message);
 }
 
 // xiao mod
@@ -463,12 +456,10 @@ void optionSelectionUI() {
           selectMedical(WHITE);
           Message = 2;
         } else if (Message == 2) {
-          //Message = selectLeft();
           deselectMedical();
           selectShelter(WHITE);
           Message = 0;
         }
-        //tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
         signal_quality = 0;
       }
     } else if (analogRead(BUTTON) <= 500) {
@@ -487,26 +478,14 @@ void optionSelectionUI() {
           selectShelter(WHITE);
           Message = 0;
         }
-        //tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
         signal_quality = 0;
       }
     }
   } else if (!digitalRead(CONFIRM)) {
     screenOn = millis(); // reset sleep time
-    //tft.fillRoundRect(90, 180, 180, 60, 0, BLACK);
     c_Message = Message;
     requestStatus = "P";
-    //delay(100);
-    // some code to show it has been confirmed
   }
-
-  // this part is for debugging purposes
-//  tft.setCursor(80, 180);
-//  tft.print("Message:");
-//  tft.print(c_Message);
-//  tft.setCursor(10,200);
-//  tft.print(broadcastMessage);
-  //delay(100);
 }
 
 void selectShelter(int color) {
@@ -581,10 +560,9 @@ void readLopy() {
     else if (requestStatus == "I") draw_ellipsis();
     else {
       draw_double_tick();
-      requestStatus = "P"; //reset to pending
+      c_Message = 11; //reset messsage
     }
 
-    // draw broadcast
     draw_broadcast();
   }
 
