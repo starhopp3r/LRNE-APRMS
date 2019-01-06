@@ -485,6 +485,7 @@ void optionSelectionUI() {
     screenOn = millis(); // reset sleep time
     c_Message = Message;
     requestStatus = "P";
+    clear_status(); //clears any status
   }
 }
 
