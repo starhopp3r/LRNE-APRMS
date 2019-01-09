@@ -438,7 +438,7 @@ void normalDisplay() {
 }
 
 int signal_quality = 0;
-#define MIN_QUALITY 6
+#define MIN_QUALITY 8
 void optionSelectionUI() {
 
   // left right scrolling
