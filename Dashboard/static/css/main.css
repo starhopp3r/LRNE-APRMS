@@ -1,0 +1,516 @@
+@font-face {
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    src: url("../fonts/Brandon_reg.otf") format("opentype");
+}
+
+@font-face {
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    font-weight: bold;
+    src: url("../fonts/Brandon_bld.otf") format("opentype");
+}
+
+body {
+	margin: 0;
+    background-color: rgb(51, 51, 51);
+}
+
+h3 {
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    font-size: 23pt;
+}
+
+p {
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+}
+
+b {
+    font-weight: 500;
+}
+
+button:focus { 
+    outline: none; 
+}
+
+#splashscreen {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    display:flex;
+  	align-items: center;
+  	justify-content:center;
+    position: absolute;
+    z-index: 99;
+    background-color: rgb(17, 17, 17);
+}
+
+.enter {
+	font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+	font-size: 60px;
+    font-weight: 500;
+    line-height: 48px;
+	color: #fff;
+}
+
+.main-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.float-div {
+    /* Positioning */
+    top: calc(20% + 2px);
+    z-index: 1;
+    width: 260px;
+    height: 275px;
+    position: absolute;
+    /* Background and foreground color*/
+    color: #fff;
+    background: rgb(32, 32, 32);
+    /* Corner radius */
+    border: 5px solid rgb(32, 32, 32);
+    border-top-right-radius: 8px;
+    -moz-border-top-right-radius: 8px;
+    -webkit-border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    -moz-border-bottom-right-radius: 8px;
+    -webkit-border-bottom-right-radius: 8px;
+    /* Default display is none. JS will reset later*/
+    display: none;
+    /* Box shadow */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.float-div-title {
+    margin: 0;
+    margin-top: 3px;
+    margin-left: 12px;
+    font-weight: 500;
+}
+
+.hr-rule {
+    height: 1px;
+    border-width: 0;
+    color: rgb(65, 65, 65);
+    background-color: rgb(65, 65, 65); 
+}
+
+
+.hr-rule-vital {
+    height: 1px;
+    margin-top: 0;
+    border-width: 0;
+    color: rgb(65, 65, 65);
+    background-color: rgb(65, 65, 65); 
+}
+
+.float-info {
+    margin: 0;
+    margin-top: 12px;
+    margin-left: 12px;
+}
+
+.section-header {
+    margin: 0;
+    z-index: 2;
+    height: 75px;
+    color: #fff;
+    background: rgb(26, 26, 26);
+    line-height: 75px;
+    position: relative;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.section-title {
+    margin: 0;
+    margin-left: 12px;
+    font-weight: 500;
+}
+
+#top-header {
+    display: none;
+}
+
+.gmap {
+    color: #fff;
+    background-color: rgb(80, 80, 80);
+    text-align: center;
+    vertical-align: middle;
+    line-height: calc(100vh - 75px);
+    width: 100%; 
+    height: calc(100% - 75px);
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    font-size: 32pt;
+}
+
+.broadcast-button {
+    background-color: #fff;
+    border: none;
+    color: #000;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: 500;
+    border-radius: 8px;
+    margin: 0;
+    margin-top: 15px;
+    margin-left: 12px;
+}
+
+.broadcast-button:hover {
+    background: #000;
+    color: #fff;
+}
+
+.broadcast-button:active {
+    background: #000;
+    color: #fff;
+}
+
+.broadcast-dialog {
+    z-index: 50;
+    /* Position */
+    position: fixed;
+    margin: auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 500px;
+    height: 120px;
+    /* Background and foreground color*/
+    color: #fff;
+    background: rgb(26, 26, 26);
+    /* Corner radius */
+    border-radius: 10px;
+    /* Padding and alignment */
+    padding: 24px;
+    text-align: center;
+    /* Default display is none. JS will reset later*/
+    display: none;
+    /* Box shadow */
+    box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+}
+
+.dialog-heading {
+    margin: 0;
+    font-weight: 500;
+}
+
+.dialog-text {
+    width: 100%;
+    padding: 12px 8px;
+    margin: 15px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14pt;
+    text-transform: uppercase;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+}
+
+/* Dropdown map options */
+.dropbtn {
+    background-color: rgb(26, 26, 26);
+    color: white;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    line-height: 18px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    vertical-align: middle;
+    white-space: nowrap;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.dropbtn:hover {
+    background-color: rgb(36, 36, 36);
+}
+
+.dropdown {
+    right: 0;
+    margin-top: 30px;
+    position: absolute;
+    display: inline-block;
+    z-index: 16;
+}
+
+.dropdown-content {
+    display: none;
+    right: 0;
+    position: absolute;
+    background-color: rgb(50, 50, 50);
+    min-width: 262px;
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+}
+
+.dropdown-content p {
+    color: #fff;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    margin: 0;
+}
+
+.dropdown p:hover {
+    background-color: rgb(70, 70, 70);
+    cursor: pointer;
+}
+
+.show {
+    display: block;
+}
+
+.logistics-section {
+    width: 100%;
+    height: calc(100% - 75px);
+    background-color: rgb(80, 80, 80);
+}
+
+.card {
+  background: rgb(32, 32, 32);
+  color: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  display: none;
+  height: 245px;
+  margin: 1rem;
+  position: relative;
+  width: 300px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.card-header {
+    margin: 0;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    border: 2px solid #fff;
+    text-align: center;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    border-radius: 8px;
+    font-weight: 400;
+}
+
+/* Status dropdown */
+/* Dropdown map options */
+.status-dropbtn {
+    background-color: #fff;
+    color: #000;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    font-weight: 500;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.status-dropbtn:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+.status-dropdown {
+    position: absolute;
+    display: inline-block;
+}
+
+.status-dropdown-content {
+    display: none;
+    position: absolute;
+    min-width: 130px;
+    background-color: rgb(50, 50, 50);
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+}
+
+.status-dropdown-content p {
+    color: #fff;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    margin: 0;
+}
+
+.status-dropdown p:hover {
+    background-color: rgb(70, 70, 70);
+    cursor: pointer;
+}
+
+.look {
+    display: block;
+}
+
+.logistics-placeholder {
+    margin: 0;
+    color: #fff;
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+    font-size: 32pt;
+    text-align: center;
+    vertical-align: middle;
+    line-height: calc(100vh - 75px);       /* the same as your div height */
+}
+
+.map-container {
+    width: 100%;
+    height: calc(100vh - 75px);
+    position: relative;
+}
+
+/* Loader */
+.loader {
+    height: 100px;
+    width: 100px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    -webkit-animation: loader-1 2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+            animation: loader-1 2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+}
+@-webkit-keyframes loader-1 {
+    0%   { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes loader-1 {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.loader::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+    bottom: 0; right: auto;
+    margin: auto;
+    width: 14px;
+    height: 14px;
+    background: #FFF;
+    border-radius: 50%;
+    -webkit-animation: loader-2 2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+            animation: loader-2 2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+}
+@-webkit-keyframes loader-2 {
+    0%   { -webkit-transform: translate3d(0, 0, 0) scale(1); }
+    50%  { -webkit-transform: translate3d(100px, 0, 0) scale(.5); }
+    100% { -webkit-transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes loader-2 {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(100px, 0, 0) scale(.5); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+.loader::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0; left: auto;
+    bottom: 0; right: 0;
+    margin: auto;
+    width: 14px;
+    height: 14px;
+    background: #FFF;
+    border-radius: 50%;
+    -webkit-animation: loader-3 2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+            animation: loader-3 2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+}
+@-webkit-keyframes loader-3 {
+    0%   { -webkit-transform: translate3d(0, 0, 0) scale(1); }
+    50%  { -webkit-transform: translate3d(-100px, 0, 0) scale(.5); }
+    100% { -webkit-transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes loader-3 {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(-100px, 0, 0) scale(.5); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+.loader span {
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+    bottom: 0; right: 0;
+    margin: auto;
+    height: 100px;
+    width: 100px;
+}
+.loader span::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+    bottom: auto; right: 0;
+    margin: auto;
+    width: 14px;
+    height: 14px;
+    background: #FFF;
+    border-radius: 50%;
+    -webkit-animation: loader-4 2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+            animation: loader-4 2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+}
+@-webkit-keyframes loader-4 {
+    0%   { -webkit-transform: translate3d(0, 0, 0) scale(1); }
+    50%  { -webkit-transform: translate3d(0, 100px, 0) scale(.5); }
+    100% { -webkit-transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes loader-4 {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(0, 100px, 0) scale(.5); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+.loader span::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: auto; left: 0;
+    bottom: 0; right: 0;
+    margin: auto;
+    width: 14px;
+    height: 14px;
+    background: #FFF;
+    border-radius: 50%;
+    -webkit-animation: loader-5 2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+            animation: loader-5 2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+}
+@-webkit-keyframes loader-5 {
+    0%   { -webkit-transform: translate3d(0, 0, 0) scale(1); }
+    50%  { -webkit-transform: translate3d(0, -100px, 0) scale(.5); }
+    100% { -webkit-transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes loader-5 {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(0, -100px, 0) scale(.5); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* Customise JuxtaposeJS to match branding */
+.jx-label {
+    font-family: 'Brandon Grotesque', Helvetica, sans-serif;
+}
+
+.jx-knightlab {
+    display: none !important;
+}
+
+.juxtapose {
+    position: absolute !important;
+}
